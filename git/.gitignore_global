@@ -1,0 +1,59 @@
+# ==============================================================================
+# Operating Systems
+# ==============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+
+# ==============================================================================
+# IDEs and Editors
+# ==============================================================================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+*.code-workspace
+.history/
+
+# ==============================================================================
+# Programming Languages
+# ==============================================================================
+
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+.node_repl_history
+.yarn-integrity
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+
+# ==============================================================================
+# Tools and Frameworks
+# ==============================================================================
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp

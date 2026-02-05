@@ -1,0 +1,63 @@
+k9s:
+  # Refresh rate for resource updates (seconds)
+  refreshRate: 2
+
+  # Maximum connection retry attempts
+  maxConnRetry: 5
+
+  # Enable read-only mode
+  readOnly: false
+
+  # Log level (debug, info, warn, error, fatal, panic)
+  logLevel: info
+
+  # Log request/response
+  logRequestBody: false
+
+  # UI settings
+  ui:
+    # Enable mouse support
+    enableMouse: false
+
+    # Headless mode
+    headless: false
+
+    # Logo display
+    logoless: false
+
+    # Crumb display
+    crumbsless: false
+
+    # Skin (default, transparent, dark)
+    skin: dark
+
+  # Skip latest version check
+  skipLatestRevCheck: false
+
+  # Disable pod metrics (set to true if metrics-server not available)
+  disablePodCounting: false
+
+  # Cluster scoped resources
+  clusters:
+    # Namespace to use on startup
+    # namespace:
+    #   active: default
+    #   favorites:
+    #     - default
+    #     - kube-system
+
+  # Command aliases
+  # aliases:
+  #   aliases:
+  #     dp: v1/deployments
+  #     sec: v1/secrets
+  #     svc: v1/services
+  #     cm: v1/configmaps
+
+  # Shell pod configuration
+  shellPod:
+    image: busybox:1.35.0
+    namespace: default
+    limits:
+      cpu: 100m
+      memory: 100Mi
