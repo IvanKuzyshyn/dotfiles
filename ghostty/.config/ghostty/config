@@ -1,0 +1,36 @@
+# ==============================================================================
+# Ghostty Terminal Configuration
+# ==============================================================================
+
+# Font
+font-family = "JetBrains Mono"
+font-size = 14
+
+# Theme
+theme = dark:Dracula
+
+# Window
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+
+# Cursor
+cursor-style = block
+cursor-style-blink = false
+
+# Shell
+shell-integration = zsh
+
+# Scrollback
+scrollback-limit = 10000
+
+# Mouse
+mouse-hide-while-typing = true
+
+# Clipboard
+clipboard-read = allow
+clipboard-write = allow
+
+# Performance
+macos-titlebar-style = native
+macos-option-as-alt = true
