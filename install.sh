@@ -49,6 +49,22 @@ for package in "${PACKAGES[@]}"; do
     fi
 done
 
+# Install Homebrew casks (GUI applications)
+echo "📦 Installing Homebrew casks..."
+CASKS=(
+    ghostty
+    raycast
+)
+
+for cask in "${CASKS[@]}"; do
+    if brew list --cask "$cask" &> /dev/null; then
+        echo "  ✅ $cask already installed"
+    else
+        echo "  📦 Installing $cask..."
+        brew install --cask "$cask"
+    fi
+done
+
 # Install Rust via rustup
 if command -v rustc &> /dev/null; then
     echo "✅ Rust already installed ($(rustc --version))"

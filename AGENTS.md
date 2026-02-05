@@ -51,6 +51,7 @@ The repository provides a two-step setup process:
    - Detects platform (macOS only currently)
    - Installs Homebrew if missing
    - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go
+   - Installs casks: ghostty (terminal emulator), raycast (productivity launcher)
    - Installs Rust via rustup
    - Installs nvm
    - Idempotent (safe to re-run)
@@ -68,6 +69,8 @@ The repository provides a two-step setup process:
 | Tool | Method | Location |
 |------|--------|----------|
 | Homebrew packages | `brew install` | Managed by Homebrew |
+| Homebrew casks (GUI apps) | `brew install --cask` | Managed by Homebrew |
+| Ghostty, Raycast | `brew install --cask` | `/Applications/` |
 | Rust | rustup installer | `~/.cargo/` |
 | nvm | Official installer | `~/.nvm/` |
 | GNU Stow | `brew install stow` | Required for deployment |

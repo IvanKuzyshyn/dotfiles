@@ -46,6 +46,8 @@ The `install.sh` script installs all required tools via Homebrew:
 - jq, yq (JSON/YAML processors)
 - ncdu (Disk usage analyzer)
 - git, go (Development)
+- Ghostty (Terminal emulator)
+- Raycast (Productivity launcher)
 - Rust (via rustup)
 - nvm (Node Version Manager)
 
