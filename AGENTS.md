@@ -51,9 +51,11 @@ The repository provides a two-step setup process:
    - Detects platform (macOS only currently)
    - Installs Homebrew if missing
    - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go
-   - Installs casks: ghostty (terminal emulator), raycast (productivity launcher)
+   - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), docker (Docker Desktop)
    - Installs Rust via rustup
-   - Installs nvm
+   - Installs oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
+   - Installs nvm and Node.js LTS
+   - Installs Claude Code via npm
    - Idempotent (safe to re-run)
 
 2. **`./bootstrap.sh`** - Deploys configurations via Stow
@@ -70,9 +72,13 @@ The repository provides a two-step setup process:
 |------|--------|----------|
 | Homebrew packages | `brew install` | Managed by Homebrew |
 | Homebrew casks (GUI apps) | `brew install --cask` | Managed by Homebrew |
-| Ghostty, Raycast | `brew install --cask` | `/Applications/` |
+| Ghostty, Raycast, Cursor, Docker | `brew install --cask` | `/Applications/` |
 | Rust | rustup installer | `~/.cargo/` |
+| oh-my-zsh | Official installer | `~/.oh-my-zsh/` |
+| zsh plugins | git clone | `~/.oh-my-zsh/custom/plugins/` |
 | nvm | Official installer | `~/.nvm/` |
+| Node.js | nvm | `~/.nvm/versions/node/` |
+| Claude Code | npm global | `~/.npm/` or nvm node path |
 | GNU Stow | `brew install stow` | Required for deployment |
 
 ## Configuration Files
@@ -80,16 +86,21 @@ The repository provides a two-step setup process:
 ### Zsh (`zsh/.zshrc`)
 
 **Structure (in order):**
-1. Environment variables (EDITOR, LANG, etc.)
-2. Path configuration (Go, Homebrew, local bin)
-3. nvm setup
-4. Rust setup
-5. Aliases (Kubernetes, Git, directory)
-6. Tool completions (AWS CLI, gh, kubectl)
-7. Prompt (git branch via vcs_info)
-8. History settings
-9. Completion system
-10. Key bindings
+1. Oh My Zsh configuration and plugins
+2. Environment variables (EDITOR, LANG, etc.)
+3. Path configuration (Go, Homebrew, local bin)
+4. nvm setup
+5. Rust setup
+6. Aliases (Kubernetes, Git, directory)
+7. Tool completions (AWS CLI, gh, kubectl)
+8. Prompt (git branch via vcs_info)
+9. History settings
+10. Completion system
+11. Key bindings
+
+**Oh My Zsh plugins:**
+- zsh-autosuggestions (fish-like autosuggestions)
+- zsh-syntax-highlighting (syntax highlighting for commands)
 
 **Key features:**
 - Kubernetes aliases (`k=kubectl`, `kgp`, `kgs`, etc.)
@@ -133,7 +144,7 @@ The repository provides a two-step setup process:
 
 **Basic terminal settings:**
 - Font: JetBrains Mono, size 14
-- Theme: dark:Dracula
+- Theme: Dracula+
 - Window padding: 10px
 - Cursor: block, no blink
 - Shell integration: zsh

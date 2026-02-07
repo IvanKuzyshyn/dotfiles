@@ -1,4 +1,19 @@
 # ==============================================================================
+# Oh My Zsh Configuration
+# ==============================================================================
+
+export ZSH="$HOME/.oh-my-zsh"
+
+# Plugins (zsh-syntax-highlighting must be last)
+plugins=(
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+)
+
+# Load oh-my-zsh
+[ -f "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
+
+# ==============================================================================
 # Environment Variables
 # ==============================================================================
 

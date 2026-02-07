@@ -51,14 +51,31 @@ done
 
 # Install Homebrew casks (GUI applications)
 echo "📦 Installing Homebrew casks..."
+
+# Function to get app name for a cask
+get_app_name() {
+    case "$1" in
+        ghostty) echo "Ghostty.app" ;;
+        raycast) echo "Raycast.app" ;;
+        cursor)  echo "Cursor.app" ;;
+        docker)  echo "Docker.app" ;;
+        *)       echo "" ;;
+    esac
+}
+
 CASKS=(
     ghostty
     raycast
+    cursor
+    docker
 )
 
 for cask in "${CASKS[@]}"; do
+    app_name=$(get_app_name "$cask")
     if brew list --cask "$cask" &> /dev/null; then
-        echo "  ✅ $cask already installed"
+        echo "  ✅ $cask already installed (via Homebrew)"
+    elif [ -n "$app_name" ] && [ -d "/Applications/$app_name" ]; then
+        echo "  ✅ $cask already installed (found /Applications/$app_name)"
     else
         echo "  📦 Installing $cask..."
         brew install --cask "$cask"
@@ -75,15 +92,65 @@ else
     echo "✅ Rust installed ($(rustc --version))"
 fi
 
+# Install oh-my-zsh
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "✅ oh-my-zsh already installed"
+else
+    echo "📦 Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    echo "✅ oh-my-zsh installed"
+fi
+
+# Install zsh plugins
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+# zsh-autosuggestions
+if [ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    echo "✅ zsh-autosuggestions already installed"
+else
+    echo "📦 Installing zsh-autosuggestions..."
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+    echo "✅ zsh-autosuggestions installed"
+fi
+
+# zsh-syntax-highlighting
+if [ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    echo "✅ zsh-syntax-highlighting already installed"
+else
+    echo "📦 Installing zsh-syntax-highlighting..."
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+    echo "✅ zsh-syntax-highlighting installed"
+fi
+
 # Install nvm
 if [ -d "$HOME/.nvm" ]; then
     echo "✅ nvm already installed"
 else
     echo "📦 Installing nvm..."
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    echo "✅ nvm installed"
+fi
+
+# Load nvm for this session
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# Install Node.js LTS via nvm if not present
+if command -v node &> /dev/null; then
+    echo "✅ Node.js already installed ($(node --version))"
+else
+    echo "📦 Installing Node.js LTS via nvm..."
+    nvm install --lts
+    nvm use --lts
+    echo "✅ Node.js installed ($(node --version))"
+fi
+
+# Install Claude Code via npm
+if command -v claude &> /dev/null; then
+    echo "✅ Claude Code already installed"
+else
+    echo "🤖 Installing Claude Code..."
+    npm install -g @anthropic-ai/claude-code
+    echo "✅ Claude Code installed"
 fi
 
 echo ""
