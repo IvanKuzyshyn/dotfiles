@@ -7,7 +7,7 @@ font-family = "JetBrains Mono"
 font-size = 14
 
 # Theme
-theme = dark:Dracula
+theme = Dracula+
 
 # Window
 window-padding-x = 10
