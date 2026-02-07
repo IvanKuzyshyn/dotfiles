@@ -51,16 +51,21 @@ done
 
 # Install Homebrew casks (GUI applications)
 echo "📦 Installing Homebrew casks..."
-CASKS=(
-    ghostty
-    raycast
-    cursor
-    docker
+
+# Associative array: cask name -> app name in /Applications
+declare -A CASKS=(
+    [ghostty]="Ghostty.app"
+    [raycast]="Raycast.app"
+    [cursor]="Cursor.app"
+    [docker]="Docker.app"
 )
 
-for cask in "${CASKS[@]}"; do
+for cask in "${!CASKS[@]}"; do
+    app_name="${CASKS[$cask]}"
     if brew list --cask "$cask" &> /dev/null; then
-        echo "  ✅ $cask already installed"
+        echo "  ✅ $cask already installed (via Homebrew)"
+    elif [ -d "/Applications/$app_name" ]; then
+        echo "  ✅ $cask already installed (found /Applications/$app_name)"
     else
         echo "  📦 Installing $cask..."
         brew install --cask "$cask"
