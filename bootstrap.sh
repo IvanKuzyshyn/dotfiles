@@ -63,8 +63,9 @@ EOF
 
 # Create backup directory with timestamp
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
+BACKUP_CREATED=false
 
-# Check for existing configs and backup if needed
+# Check for existing configs and handle conflicts
 CONFIGS_TO_CHECK=(
     "$HOME/.zshrc"
     "$HOME/.gitconfig"
@@ -74,26 +75,44 @@ CONFIGS_TO_CHECK=(
     "$HOME/.config/k9s/config.yaml"
 )
 
-NEEDS_BACKUP=false
-for config in "${CONFIGS_TO_CHECK[@]}"; do
-    if [ -e "$config" ] && [ ! -L "$config" ]; then
-        NEEDS_BACKUP=true
-        break
-    fi
-done
+# Function to handle a single conflicting file
+handle_conflict() {
+    local config="$1"
+    echo ""
+    echo "⚠️  Conflict: $config already exists"
+    echo "   [b] Back up and remove"
+    echo "   [r] Remove without backup"
+    echo "   [s] Skip (stow will fail for this tool)"
+    read -p "   Choose action (b/r/s): " action
 
-if [ "$NEEDS_BACKUP" = true ]; then
-    echo "📦 Creating backup at: $BACKUP_DIR"
-    mkdir -p "$BACKUP_DIR"
-
-    for config in "${CONFIGS_TO_CHECK[@]}"; do
-        if [ -e "$config" ] && [ ! -L "$config" ]; then
+    case "$action" in
+        [Bb])
+            if [ "$BACKUP_CREATED" = false ]; then
+                mkdir -p "$BACKUP_DIR"
+                BACKUP_CREATED=true
+                echo "📦 Backup directory: $BACKUP_DIR"
+            fi
             mkdir -p "$BACKUP_DIR/$(dirname "$config")"
             cp -r "$config" "$BACKUP_DIR/$config"
-            echo "  ✅ Backed up: $config"
-        fi
-    done
-fi
+            rm -rf "$config"
+            echo "   ✅ Backed up and removed: $config"
+            ;;
+        [Rr])
+            rm -rf "$config"
+            echo "   ✅ Removed: $config"
+            ;;
+        [Ss]|*)
+            echo "   ⏭️ Skipped: $config"
+            ;;
+    esac
+}
+
+# Check each config for conflicts
+for config in "${CONFIGS_TO_CHECK[@]}"; do
+    if [ -e "$config" ] && [ ! -L "$config" ]; then
+        handle_conflict "$config"
+    fi
+done
 
 # Prompt for git personalization
 prompt_git_config
@@ -126,7 +145,7 @@ done
 echo ""
 echo "✨ Dotfiles deployment complete!"
 
-if [ "$NEEDS_BACKUP" = true ]; then
+if [ "$BACKUP_CREATED" = true ]; then
     echo ""
     echo "📦 Backup location: $BACKUP_DIR"
 fi
