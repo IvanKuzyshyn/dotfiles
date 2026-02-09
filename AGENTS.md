@@ -36,13 +36,6 @@ dotfiles/
     └── .config/k9s/config.yaml
 ```
 
-## Git Information
-
-- **Remote**: git@github.com:IvanKuzyshyn/dotfiles.git
-- **Main branch**: main
-- **Author**: Ivan Kuzyshyn <kuzyshyn.ivan@gmail.com>
-- **License**: Public domain (Unlicense)
-
 ## Setup Workflow
 
 The repository provides a two-step setup process:
