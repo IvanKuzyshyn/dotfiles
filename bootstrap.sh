@@ -134,7 +134,7 @@ echo ""
 echo "🔗 Creating symlinks..."
 
 for tool in "${TOOLS[@]}"; do
-    if [ -d "$tool" ]; then
+    if [ -d "configs/$tool" ]; then
         echo "  📁 Stowing $tool..."
         stow -v "$tool"
     else

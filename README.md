@@ -85,17 +85,18 @@ dotfiles/
 ├── bootstrap.sh            # Config deployment script
 ├── README.md               # This file
 ├── AGENTS.md               # AI agent guidance
-├── zsh/
-│   └── .zshrc             # Shell configuration
-├── git/
-│   ├── .gitconfig         # Git settings
-│   └── .gitignore_global  # Global Git ignores
-├── vim/
-│   └── .vimrc             # Vim configuration
-├── ghostty/
-│   └── .config/ghostty/config
-└── k9s/
-    └── .config/k9s/config.yaml
+└── configs/                # Tool configurations (stow packages)
+    ├── zsh/
+    │   └── .zshrc             # Shell configuration
+    ├── git/
+    │   ├── .gitconfig         # Git settings
+    │   └── .gitignore_global  # Global Git ignores
+    ├── vim/
+    │   └── .vimrc             # Vim configuration
+    ├── ghostty/
+    │   └── .config/ghostty/config
+    └── k9s/
+        └── .config/k9s/config.yaml
 ```
 
 ## Features
@@ -124,15 +125,15 @@ which is not tracked in the repository.
 
 ## Adding New Tools
 
-1. Create a new directory in the repo:
+1. Create a new directory in `configs/`:
    ```bash
-   mkdir -p newtool
+   mkdir -p configs/newtool
    ```
 
 2. Add config files:
    ```bash
    # Files will be symlinked to $HOME
-   newtool/.newtoolrc
+   configs/newtool/.newtoolrc
    ```
 
 3. Update `bootstrap.sh`:
@@ -212,8 +213,8 @@ git clone git@github.com:yourusername/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
 # Customize configurations to your preferences
-vim git/.gitconfig
-vim zsh/.zshrc
+vim configs/git/.gitconfig
+vim configs/zsh/.zshrc
 
 # Deploy your customized configs
 ./bootstrap.sh

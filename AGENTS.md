@@ -17,23 +17,24 @@ This is a personal dotfiles repository for managing user configuration files acr
 ```
 dotfiles/
 ├── .gitignore              # Excludes IDE/OS files
-├── .stowrc                 # Stow configuration (target=$HOME)
+├── .stowrc                 # Stow configuration (dir=configs, target=$HOME)
 ├── install.sh              # Tool installation via Homebrew
 ├── bootstrap.sh            # Config deployment via Stow
 ├── README.md               # User-facing documentation
 ├── AGENTS.md               # This file
 ├── LICENSE                 # Unlicense (public domain)
-├── zsh/
-│   └── .zshrc             # Shell config (~150 lines)
-├── git/
-│   ├── .gitconfig         # Git settings
-│   └── .gitignore_global  # Global ignores
-├── vim/
-│   └── .vimrc             # Minimal Vim config
-├── ghostty/
-│   └── .config/ghostty/config
-└── k9s/
-    └── .config/k9s/config.yaml
+└── configs/                # Tool configurations (stow packages)
+    ├── zsh/
+    │   └── .zshrc             # Shell config (~150 lines)
+    ├── git/
+    │   ├── .gitconfig         # Git settings
+    │   └── .gitignore_global  # Global ignores
+    ├── vim/
+    │   └── .vimrc             # Minimal Vim config
+    ├── ghostty/
+    │   └── .config/ghostty/config
+    └── k9s/
+        └── .config/k9s/config.yaml
 ```
 
 ## Setup Workflow
@@ -76,7 +77,7 @@ The repository provides a two-step setup process:
 
 ## Configuration Files
 
-### Zsh (`zsh/.zshrc`)
+### Zsh (`configs/zsh/.zshrc`)
 
 **Structure (in order):**
 1. Oh My Zsh configuration and plugins
@@ -102,7 +103,7 @@ The repository provides a two-step setup process:
 - Shell completions for tools
 - Git branch in prompt
 
-### Git (`git/`)
+### Git (`configs/git/`)
 
 **`.gitconfig`:**
 - User: Configured via `~/.gitconfig.local` (not in repo)
@@ -124,7 +125,7 @@ The repository provides a two-step setup process:
 - Language artifacts (node_modules/, __pycache__/, target/)
 - Tools (.terraform/, .claude/)
 
-### Vim (`vim/.vimrc`)
+### Vim (`configs/vim/.vimrc`)
 
 **Minimal configuration:**
 - Line numbers (number, relativenumber)
@@ -133,7 +134,7 @@ The repository provides a two-step setup process:
 - Basic UI (ruler, showcmd, cursorline)
 - No plugins (user doesn't use Vim heavily)
 
-### Ghostty (`ghostty/.config/ghostty/config`)
+### Ghostty (`configs/ghostty/.config/ghostty/config`)
 
 **Basic terminal settings:**
 - Font: JetBrains Mono, size 14
@@ -143,7 +144,7 @@ The repository provides a two-step setup process:
 - Shell integration: zsh
 - macOS-specific options
 
-### k9s (`k9s/.config/k9s/config.yaml`)
+### k9s (`configs/k9s/.config/k9s/config.yaml`)
 
 **Kubernetes UI configuration:**
 - Refresh rate: 2 seconds
@@ -158,7 +159,7 @@ The repository provides a two-step setup process:
 The repository uses git's `[include]` directive to separate personal identity
 from shared configuration:
 
-- **Shared config**: `git/.gitconfig` (tracked in repo)
+- **Shared config**: `configs/git/.gitconfig` (tracked in repo)
   - Contains all git preferences, aliases, and settings
   - Does NOT contain user name/email
 
@@ -196,7 +197,7 @@ You can add any git configuration to `~/.gitconfig.local`. For example:
 
 To add a new tool configuration:
 
-1. Create directory: `mkdir -p newtool/`
+1. Create directory: `mkdir -p configs/newtool/`
 2. Add config files (will be symlinked to `$HOME`)
 3. Update `bootstrap.sh` TOOLS array
 4. Run `./bootstrap.sh` to deploy
@@ -204,8 +205,8 @@ To add a new tool configuration:
 **Example:**
 ```bash
 # Add tmux
-mkdir -p tmux/
-echo "set -g mouse on" > tmux/.tmux.conf
+mkdir -p configs/tmux/
+echo "set -g mouse on" > configs/tmux/.tmux.conf
 
 # Edit bootstrap.sh, add "tmux" to TOOLS array
 
@@ -276,7 +277,7 @@ stow zsh     # Restow
 
 - `.gitignore` excludes `.idea/`, `.DS_Store`, `.vscode/`, `*.swp`, `*.log`
 - Scripts are executable (`chmod +x install.sh bootstrap.sh`)
-- `.stowrc` configures target directory and ignore patterns
+- `.stowrc` configures stow directory (`configs/`), target directory, and ignore patterns
 - Backups are timestamped: `~/.dotfiles_backup_YYYYMMDD_HHMMSS`
 
 ## Future Enhancements (Out of Scope)
