@@ -2,6 +2,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/menu.sh"
+parse_flags "$@"
+
 echo "🔗 Deploying dotfiles with GNU Stow..."
 
 # Verify stow is installed
@@ -10,6 +14,45 @@ if ! command -v stow &> /dev/null; then
     echo "Run ./install.sh first to install required tools"
     exit 1
 fi
+
+# ── Selection menu ──────────────────────────────────────────────────
+
+# Map tool names to human-readable descriptions
+get_tool_desc() {
+    case "$1" in
+        zsh)     echo "shell configuration" ;;
+        git)     echo "git settings and aliases" ;;
+        vim)     echo "editor configuration" ;;
+        ghostty) echo "terminal emulator" ;;
+        k9s)     echo "Kubernetes UI" ;;
+        claude)  echo "AI assistant settings" ;;
+        mise)    echo "dev tools and env manager" ;;
+        *)       echo "" ;;
+    esac
+}
+
+# Auto-detect configs from configs/ directory
+for dir in "$SCRIPT_DIR"/configs/*/; do
+    tool=$(basename "$dir")
+    add_item "$tool" "$(get_tool_desc "$tool")"
+done
+
+show_selection_menu "Select configs to deploy (all selected by default):"
+
+# ── Conflict checking ───────────────────────────────────────────────
+
+# Return config file paths for a given tool (used for conflict detection)
+get_config_paths() {
+    case "$1" in
+        zsh)     echo "$HOME/.zshrc" ;;
+        git)     echo "$HOME/.gitconfig $HOME/.gitignore_global" ;;
+        vim)     echo "$HOME/.vimrc" ;;
+        ghostty) echo "$HOME/.config/ghostty/config" ;;
+        k9s)     echo "$HOME/.config/k9s/config.yaml" ;;
+        claude)  echo "$HOME/.claude/settings.json" ;;
+        mise)    echo "$HOME/.config/mise/config.toml" ;;
+    esac
+}
 
 # Function to prompt for git configuration
 prompt_git_config() {
@@ -65,16 +108,6 @@ EOF
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
 BACKUP_CREATED=false
 
-# Check for existing configs and handle conflicts
-CONFIGS_TO_CHECK=(
-    "$HOME/.zshrc"
-    "$HOME/.gitconfig"
-    "$HOME/.gitignore_global"
-    "$HOME/.vimrc"
-    "$HOME/.config/ghostty/config"
-    "$HOME/.config/k9s/config.yaml"
-)
-
 # Function to handle a single conflicting file
 handle_conflict() {
     local config="$1"
@@ -107,33 +140,28 @@ handle_conflict() {
     esac
 }
 
-# Check each config for conflicts
-for config in "${CONFIGS_TO_CHECK[@]}"; do
-    if [ -e "$config" ] && [ ! -L "$config" ]; then
-        handle_conflict "$config"
-    fi
+# Check for conflicts only for selected configs
+for tool in "${MENU_ITEMS[@]}"; do
+    is_selected "$tool" || continue
+    for config in $(get_config_paths "$tool"); do
+        if [ -e "$config" ] && [ ! -L "$config" ]; then
+            handle_conflict "$config"
+        fi
+    done
 done
 
-# Prompt for git personalization
-prompt_git_config
+# Prompt for git personalization only if git config is selected
+if is_selected "git"; then
+    prompt_git_config
+fi
 
-# Get the directory where this script is located
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$DOTFILES_DIR"
-
-# List of tool directories to stow
-TOOLS=(
-    zsh
-    git
-    vim
-    ghostty
-    k9s
-)
+cd "$SCRIPT_DIR"
 
 echo ""
 echo "🔗 Creating symlinks..."
 
-for tool in "${TOOLS[@]}"; do
+for tool in "${MENU_ITEMS[@]}"; do
+    is_selected "$tool" || continue
     if [ -d "configs/$tool" ]; then
         echo "  📁 Stowing $tool..."
         stow -v "$tool"
@@ -154,4 +182,6 @@ echo ""
 echo "Next steps:"
 echo "  1. Restart your shell: exec zsh"
 echo "  2. Verify configs are working correctly"
-echo "  3. Delete backup if no longer needed: rm -rf $BACKUP_DIR"
+if [ "$BACKUP_CREATED" = true ]; then
+    echo "  3. Delete backup if no longer needed: rm -rf $BACKUP_DIR"
+fi

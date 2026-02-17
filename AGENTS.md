@@ -18,11 +18,14 @@ This is a personal dotfiles repository for managing user configuration files acr
 dotfiles/
 ├── .gitignore              # Excludes IDE/OS files
 ├── .stowrc                 # Stow configuration (dir=configs, target=$HOME)
+├── Brewfile                # Homebrew packages and casks (single source of truth)
 ├── install.sh              # Tool installation via Homebrew
 ├── bootstrap.sh            # Config deployment via Stow
 ├── README.md               # User-facing documentation
 ├── AGENTS.md               # This file
 ├── LICENSE                 # Unlicense (public domain)
+├── lib/
+│   └── menu.sh             # Shared interactive selection menu library
 └── configs/                # Tool configurations (stow packages)
     ├── zsh/
     │   └── .zshrc             # Shell config (~150 lines)
@@ -33,8 +36,10 @@ dotfiles/
     │   └── .vimrc             # Minimal Vim config
     ├── ghostty/
     │   └── .config/ghostty/config
-    └── k9s/
-        └── .config/k9s/config.yaml
+    ├── k9s/
+    │   └── .config/k9s/config.yaml
+    └── mise/
+        └── .config/mise/config.toml
 ```
 
 ## Setup Workflow
@@ -44,7 +49,7 @@ The repository provides a two-step setup process:
 1. **`./install.sh`** - Installs tools via Homebrew
    - Detects platform (macOS only currently)
    - Installs Homebrew if missing
-   - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go
+   - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go, mise
    - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), docker (Docker Desktop)
    - Installs Rust via rustup
    - Installs oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
@@ -73,6 +78,7 @@ The repository provides a two-step setup process:
 | nvm | Official installer | `~/.nvm/` |
 | Node.js | nvm | `~/.nvm/versions/node/` |
 | Claude Code | npm global | `~/.npm/` or nvm node path |
+| mise | `brew install mise` | Dev tools & env manager |
 | GNU Stow | `brew install stow` | Required for deployment |
 
 ## Configuration Files
@@ -152,6 +158,14 @@ The repository provides a two-step setup process:
 - UI: mouse disabled, dark skin
 - Shell pod: busybox:1.35.0
 
+### mise (`configs/mise/.config/mise/config.toml`)
+
+**Global dev tools and environment manager:**
+- auto_install: automatically installs missing tools when entering a directory
+- Uses precompiled binaries when available
+- 8 parallel jobs for tool installation
+- Per-project tool versions via `mise.toml` in project roots
+
 ## Personalization
 
 ### Git Identity
@@ -195,22 +209,38 @@ You can add any git configuration to `~/.gitconfig.local`. For example:
 
 ## Adding New Tools
 
-To add a new tool configuration:
+### Add a Homebrew package or cask
+
+Add one line to `Brewfile`:
+
+```ruby
+brew "newtool"       # CLI package
+cask "newapp"        # GUI application
+```
+
+Then run `./install.sh` and select "homebrew-tools".
+
+### Add a non-brew tool
+
+Add an `add_item` call and install block in `install.sh`.
+
+### Add a new configuration
 
 1. Create directory: `mkdir -p configs/newtool/`
 2. Add config files (will be symlinked to `$HOME`)
-3. Update `bootstrap.sh` TOOLS array
-4. Run `./bootstrap.sh` to deploy
+3. (Optional) Add a description to `get_tool_desc()` in `bootstrap.sh`
+4. (Optional) Add conflict paths to `get_config_paths()` in `bootstrap.sh`
+5. Run `./bootstrap.sh` to deploy
+
+The config is auto-detected from `configs/*/` — no array to update.
 
 **Example:**
 ```bash
-# Add tmux
+# Add tmux config
 mkdir -p configs/tmux/
 echo "set -g mouse on" > configs/tmux/.tmux.conf
 
-# Edit bootstrap.sh, add "tmux" to TOOLS array
-
-# Deploy
+# Deploy (tmux will appear in the menu automatically)
 ./bootstrap.sh
 ```
 
@@ -224,15 +254,25 @@ echo "set -g mouse on" > configs/tmux/.tmux.conf
 
 ### Script Modifications
 
+**`Brewfile`:**
+- Add/remove brew packages and casks here (single source of truth)
+- `brew bundle` handles idempotency natively
+
 **`install.sh`:**
-- Add new tools to PACKAGES array
-- Maintain idempotency (check if already installed)
-- Keep platform detection logic
+- Sources `lib/menu.sh` for interactive selection
+- Brew tools managed via `Brewfile` (not arrays in install.sh)
+- Non-brew tools (rust, oh-my-zsh, nvm, claude-code) have dedicated install blocks
+- Supports `--all` flag to skip interactive menu
 
 **`bootstrap.sh`:**
-- Add new tool directories to TOOLS array
-- Maintain backup logic
-- Keep verbose output
+- Sources `lib/menu.sh` for interactive selection
+- Auto-detects configs from `configs/*/` directories
+- Maintain backup logic and conflict detection
+- Supports `--all` flag to skip interactive menu
+
+**`lib/menu.sh`:**
+- Shared menu infrastructure (do not duplicate in scripts)
+- Bash 3.2 compatible (no associative arrays, no namerefs)
 
 ### Testing Changes
 
