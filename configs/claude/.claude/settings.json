@@ -1,0 +1,60 @@
+{
+	"$schema": "https://json.schemastore.org/claude-code-settings.json",
+	"alwaysThinkingEnabled": true,
+	"includeCoAuthoredBy": false,
+	"permissions": {
+		"allow": [
+			"Bash(cat:*)",
+			"Bash(find:*)",
+			"Bash(grep:*)",
+			"Bash(rg:*)",
+			"Bash(fd:*)",
+			"Bash(head:*)",
+			"Bash(tail:*)",
+			"Bash(sort:*)",
+			"Bash(uniq:*)",
+			"Bash(awk:*)",
+			"Bash(echo:*)",
+			"Bash(pwd:*)",
+			"Bash(mkdir:*)",
+			"Bash(ls:*)",
+			"Bash(git:*)",
+			"Bash(gh pr view:*)",
+			"Bash(gh issue view:*)",
+			"Bash(gh repo view:*)",
+			"Bash(gh run view:*)",
+			"Bash(gh run list:*)",
+			"Bash(make:*)",
+			"Bash(npm:*)",
+			"Bash(npx:*)",
+			"Bash(go:*)",
+			"Bash(cargo:*)",
+			"Bash(kubectl get:*)",
+			"Bash(kubectl describe:*)",
+			"Bash(kubectl logs:*)"
+		],
+		"deny": [
+			"Read(.env)",
+			"Read(.envrc)",
+			"Read(.env.*)",
+			"Read(node_modules)",
+			"Read(.git)"
+		],
+		"ask": [
+			"Bash(mv:*)",
+			"Bash(cp:*)",
+			"Bash(rm:*)",
+			"Bash(git push:*)",
+			"Bash(git rebase:*)",
+			"Bash(git reset:*)",
+			"Bash(git checkout:*)",
+			"Bash(git clean:*)",
+			"Bash(git branch -D:*)",
+			"Bash(kubectl apply:*)",
+			"Bash(kubectl delete:*)",
+			"Bash(curl:*)",
+			"Bash(docker:*)",
+			"WebSearch"
+		]
+	}
+}
