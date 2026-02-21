@@ -31,17 +31,18 @@ get_tool_desc() {
     esac
 }
 
-# Return config file paths for a given tool (used for conflict detection)
-get_config_paths() {
-    case "$1" in
-        zsh)     echo "$HOME/.zshrc" ;;
-        git)     echo "$HOME/.gitconfig $HOME/.gitignore_global" ;;
-        vim)     echo "$HOME/.vimrc" ;;
-        ghostty) echo "$HOME/.config/ghostty/config" ;;
-        k9s)     echo "$HOME/.config/k9s/config.yaml" ;;
-        claude)  echo "$HOME/.claude/settings.json" ;;
-        mise)    echo "$HOME/.config/mise/config.toml" ;;
-    esac
+# Detect conflicts by running stow in dry-run mode.
+# Populates the CONFLICTS array with absolute paths.
+detect_conflicts() {
+    local tool="$1"
+    CONFLICTS=()
+    local output
+    output=$(stow -n -v "$tool" 2>&1) || true
+    while IFS= read -r line; do
+        if [[ "$line" =~ "existing target is not owned by stow: "(.*) ]]; then
+            CONFLICTS+=("$HOME/${BASH_REMATCH[1]}")
+        fi
+    done <<< "$output"
 }
 
 # Function to prompt for git configuration
@@ -173,11 +174,10 @@ for tool in "${MENU_ITEMS[@]}"; do
         continue
     fi
 
-    # Check conflicts for this tool
-    for config in $(get_config_paths "$tool"); do
-        if [ -e "$config" ] && [ ! -L "$config" ]; then
-            handle_conflict "$config"
-        fi
+    # Detect and handle conflicts via stow dry run
+    detect_conflicts "$tool"
+    for config in "${CONFLICTS[@]}"; do
+        handle_conflict "$config"
     done
 
     # Git personalization

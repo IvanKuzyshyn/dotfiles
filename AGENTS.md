@@ -234,8 +234,7 @@ Add an `add_item` call and install block in `install.sh`.
 1. Create directory: `mkdir -p configs/newtool/`
 2. Add config files (will be symlinked to `$HOME`)
 3. (Optional) Add a description to `get_tool_desc()` in `bootstrap.sh`
-4. (Optional) Add conflict paths to `get_config_paths()` in `bootstrap.sh`
-5. Run `./bootstrap.sh` to deploy
+4. Run `./bootstrap.sh` to deploy (conflicts are auto-detected via stow dry run)
 
 The config is auto-detected from `configs/*/` — no array to update.
 
