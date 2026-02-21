@@ -17,23 +17,20 @@ fi
 
 echo "✅ Platform: macOS"
 
-# ── Selection menu ──────────────────────────────────────────────────
+# ── Item registry ──────────────────────────────────────────────────
 
-add_group "Package groups"
 add_item "homebrew-tools" "15 packages via Brewfile"
-
-add_group "Other tools"
-add_item "rust"        "via rustup"
-add_item "oh-my-zsh"   "zsh framework"
-add_item "nvm"         "Node.js version manager"
-add_item "claude-code" "AI coding assistant"
-
-show_selection_menu "Select tools to install (all selected by default):"
+add_item "rust"           "via rustup"
+add_item "oh-my-zsh"      "zsh framework"
+add_item "nvm"            "Node.js version manager"
+add_item "claude-code"    "AI coding assistant"
 
 # ── Installation ────────────────────────────────────────────────────
 
+echo ""
+
 # Install Homebrew packages and casks via Brewfile
-if is_selected "homebrew-tools"; then
+if confirm_item "homebrew-tools"; then
     if ! command -v brew &> /dev/null; then
         echo "📦 Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -49,7 +46,7 @@ if is_selected "homebrew-tools"; then
 fi
 
 # Install Rust via rustup
-if is_selected "rust"; then
+if confirm_item "rust"; then
     if command -v rustc &> /dev/null; then
         echo "✅ Rust already installed ($(rustc --version))"
     else
@@ -61,7 +58,7 @@ if is_selected "rust"; then
 fi
 
 # Install oh-my-zsh
-if is_selected "oh-my-zsh"; then
+if confirm_item "oh-my-zsh"; then
     if [ -d "$HOME/.oh-my-zsh" ]; then
         echo "✅ oh-my-zsh already installed"
     else
@@ -91,7 +88,7 @@ if is_selected "oh-my-zsh"; then
 fi
 
 # Install nvm
-if is_selected "nvm"; then
+if confirm_item "nvm"; then
     if [ -d "$HOME/.nvm" ]; then
         echo "✅ nvm already installed"
     else
@@ -115,7 +112,7 @@ if is_selected "nvm"; then
 fi
 
 # Install Claude Code via npm
-if is_selected "claude-code"; then
+if confirm_item "claude-code"; then
     # Load nvm if available (may have been installed earlier or in a previous run)
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -127,7 +124,7 @@ if is_selected "claude-code"; then
         npm install -g @anthropic-ai/claude-code
         echo "✅ Claude Code installed"
     else
-        echo "⚠️  Skipping Claude Code: npm not found (select nvm to install Node.js)"
+        echo "⚠️  Skipping Claude Code: npm not found (install nvm first to get Node.js)"
     fi
 fi
 

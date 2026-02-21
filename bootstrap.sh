@@ -15,7 +15,7 @@ if ! command -v stow &> /dev/null; then
     exit 1
 fi
 
-# ── Selection menu ──────────────────────────────────────────────────
+# ── Helpers ────────────────────────────────────────────────────────
 
 # Map tool names to human-readable descriptions
 get_tool_desc() {
@@ -30,16 +30,6 @@ get_tool_desc() {
         *)       echo "" ;;
     esac
 }
-
-# Auto-detect configs from configs/ directory
-for dir in "$SCRIPT_DIR"/configs/*/; do
-    tool=$(basename "$dir")
-    add_item "$tool" "$(get_tool_desc "$tool")"
-done
-
-show_selection_menu "Select configs to deploy (all selected by default):"
-
-# ── Conflict checking ───────────────────────────────────────────────
 
 # Return config file paths for a given tool (used for conflict detection)
 get_config_paths() {
@@ -56,6 +46,16 @@ get_config_paths() {
 
 # Function to prompt for git configuration
 prompt_git_config() {
+    if [ "$NON_INTERACTIVE" = true ]; then
+        if [ -f "$HOME/.gitconfig.local" ]; then
+            echo "✅ Keeping existing git configuration (~/.gitconfig.local)"
+            return 0
+        else
+            echo "⚠️  ~/.gitconfig.local not found — run bootstrap.sh interactively to configure"
+            return 0
+        fi
+    fi
+
     echo ""
     echo "⚙️  Git Configuration"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -104,13 +104,27 @@ EOF
     echo "   Email: $git_email"
 }
 
-# Create backup directory with timestamp
+# Create backup directory with timestamp (shared across all tools)
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
 BACKUP_CREATED=false
 
 # Function to handle a single conflicting file
 handle_conflict() {
     local config="$1"
+
+    if [ "$AUTO_BACKUP" = true ]; then
+        if [ "$BACKUP_CREATED" = false ]; then
+            mkdir -p "$BACKUP_DIR"
+            BACKUP_CREATED=true
+            echo "📦 Backup directory: $BACKUP_DIR"
+        fi
+        mkdir -p "$BACKUP_DIR/$(dirname "$config")"
+        cp -r "$config" "$BACKUP_DIR/$config"
+        rm -rf "$config"
+        echo "   ✅ Auto-backed up and removed: $config"
+        return
+    fi
+
     echo ""
     echo "⚠️  Conflict: $config already exists"
     echo "   [b] Back up and remove"
@@ -140,28 +154,38 @@ handle_conflict() {
     esac
 }
 
-# Check for conflicts only for selected configs
+# ── Item registry ──────────────────────────────────────────────────
+
+# Auto-detect configs from configs/ directory
+for dir in "$SCRIPT_DIR"/configs/*/; do
+    tool=$(basename "$dir")
+    add_item "$tool" "$(get_tool_desc "$tool")"
+done
+
+# ── Per-tool deploy loop ───────────────────────────────────────────
+
+cd "$SCRIPT_DIR"
+
+echo ""
+
 for tool in "${MENU_ITEMS[@]}"; do
-    is_selected "$tool" || continue
+    if ! confirm_item "$tool" "Deploy"; then
+        continue
+    fi
+
+    # Check conflicts for this tool
     for config in $(get_config_paths "$tool"); do
         if [ -e "$config" ] && [ ! -L "$config" ]; then
             handle_conflict "$config"
         fi
     done
-done
 
-# Prompt for git personalization only if git config is selected
-if is_selected "git"; then
-    prompt_git_config
-fi
+    # Git personalization
+    if [ "$tool" = "git" ]; then
+        prompt_git_config
+    fi
 
-cd "$SCRIPT_DIR"
-
-echo ""
-echo "🔗 Creating symlinks..."
-
-for tool in "${MENU_ITEMS[@]}"; do
-    is_selected "$tool" || continue
+    # Stow
     if [ -d "configs/$tool" ]; then
         echo "  📁 Stowing $tool..."
         stow -v "$tool"

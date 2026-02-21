@@ -25,7 +25,7 @@ dotfiles/
 ├── AGENTS.md               # This file
 ├── LICENSE                 # Unlicense (public domain)
 ├── lib/
-│   └── menu.sh             # Shared interactive selection menu library
+│   └── menu.sh             # Shared confirmation prompt library
 └── configs/                # Tool configurations (stow packages)
     ├── zsh/
     │   └── .zshrc             # Shell config (~150 lines)
@@ -48,6 +48,7 @@ The repository provides a two-step setup process:
 
 1. **`./install.sh`** - Installs tools via Homebrew
    - Detects platform (macOS only currently)
+   - Prompts `[Y/n]` for each tool (Enter = yes, `n` = skip)
    - Installs Homebrew if missing
    - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go, mise
    - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), docker (Docker Desktop)
@@ -56,14 +57,18 @@ The repository provides a two-step setup process:
    - Installs nvm and Node.js LTS
    - Installs Claude Code via npm
    - Idempotent (safe to re-run)
+   - `--all` flag skips prompts (installs everything)
 
 2. **`./bootstrap.sh`** - Deploys configurations via Stow
-   - Prompts for git user name and email
-   - Creates `~/.gitconfig.local` with personal git identity
+   - Prompts `[Y/n]` for each config (Enter = yes, `n` = skip)
+   - For each confirmed tool: checks conflicts → git config (if git) → stow
+   - Prompts for git user name and email when deploying git config
    - Backs up existing configs to timestamped directory
    - Creates symlinks for each tool directory
    - Uses verbose mode for transparency
    - Lists backup location on completion
+   - `--all` flag skips tool prompts
+   - `--backup` flag auto-backs-up conflicts without prompting
 
 ## Tool Installation Details
 
@@ -218,7 +223,7 @@ brew "newtool"       # CLI package
 cask "newapp"        # GUI application
 ```
 
-Then run `./install.sh` and select "homebrew-tools".
+Then run `./install.sh` and confirm when prompted for "homebrew-tools".
 
 ### Add a non-brew tool
 
@@ -240,7 +245,7 @@ The config is auto-detected from `configs/*/` — no array to update.
 mkdir -p configs/tmux/
 echo "set -g mouse on" > configs/tmux/.tmux.conf
 
-# Deploy (tmux will appear in the menu automatically)
+# Deploy (tmux will appear in the prompt list automatically)
 ./bootstrap.sh
 ```
 
@@ -259,20 +264,25 @@ echo "set -g mouse on" > configs/tmux/.tmux.conf
 - `brew bundle` handles idempotency natively
 
 **`install.sh`:**
-- Sources `lib/menu.sh` for interactive selection
+- Sources `lib/menu.sh` for confirmation prompts
 - Brew tools managed via `Brewfile` (not arrays in install.sh)
 - Non-brew tools (rust, oh-my-zsh, nvm, claude-code) have dedicated install blocks
-- Supports `--all` flag to skip interactive menu
+- Each tool confirmed inline via `confirm_item` before its install block
+- Supports `--all` flag to skip prompts (install everything)
 
 **`bootstrap.sh`:**
-- Sources `lib/menu.sh` for interactive selection
+- Sources `lib/menu.sh` for confirmation prompts
 - Auto-detects configs from `configs/*/` directories
-- Maintain backup logic and conflict detection
-- Supports `--all` flag to skip interactive menu
+- Single per-tool loop: confirm → check conflicts → git config → stow
+- Supports `--all` flag to skip tool prompts
+- Supports `--backup` flag to auto-backup conflicts without prompting
+- `--all --backup` together = fully non-interactive (CI mode)
 
 **`lib/menu.sh`:**
-- Shared menu infrastructure (do not duplicate in scripts)
+- Shared confirmation prompt library (do not duplicate in scripts)
 - Bash 3.2 compatible (no associative arrays, no namerefs)
+- Key functions: `parse_flags`, `add_item`, `confirm_item`
+- Flags: `--all` (sets `NON_INTERACTIVE`), `--backup` (sets `AUTO_BACKUP`)
 
 ### Testing Changes
 
