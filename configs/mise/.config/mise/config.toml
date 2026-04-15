@@ -1,0 +1,9 @@
+[settings]
+# Automatically install missing tools when entering a directory
+auto_install = true
+
+# Use precompiled binaries when available
+all_compile = false
+
+# Number of parallel jobs for installing tools
+jobs = 8

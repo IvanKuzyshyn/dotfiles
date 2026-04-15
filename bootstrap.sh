@@ -2,6 +2,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/lib/menu.sh"
+parse_flags "$@"
+
 echo "🔗 Deploying dotfiles with GNU Stow..."
 
 # Verify stow is installed
@@ -11,8 +15,48 @@ if ! command -v stow &> /dev/null; then
     exit 1
 fi
 
+# ── Helpers ────────────────────────────────────────────────────────
+
+# Map tool names to human-readable descriptions
+get_tool_desc() {
+    case "$1" in
+        zsh)     echo "shell configuration" ;;
+        git)     echo "git settings and aliases" ;;
+        vim)     echo "editor configuration" ;;
+        ghostty) echo "terminal emulator" ;;
+        k9s)     echo "Kubernetes UI" ;;
+        claude)  echo "AI assistant settings" ;;
+        mise)    echo "dev tools and env manager" ;;
+        *)       echo "" ;;
+    esac
+}
+
+# Detect conflicts by running stow in dry-run mode.
+# Populates the CONFLICTS array with absolute paths.
+detect_conflicts() {
+    local tool="$1"
+    CONFLICTS=()
+    local output
+    output=$(stow -n -v "$tool" 2>&1) || true
+    while IFS= read -r line; do
+        if [[ "$line" =~ "existing target is not owned by stow: "(.*) ]]; then
+            CONFLICTS+=("$HOME/${BASH_REMATCH[1]}")
+        fi
+    done <<< "$output"
+}
+
 # Function to prompt for git configuration
 prompt_git_config() {
+    if [ "$NON_INTERACTIVE" = true ]; then
+        if [ -f "$HOME/.gitconfig.local" ]; then
+            echo "✅ Keeping existing git configuration (~/.gitconfig.local)"
+            return 0
+        else
+            echo "⚠️  ~/.gitconfig.local not found — run bootstrap.sh interactively to configure"
+            return 0
+        fi
+    fi
+
     echo ""
     echo "⚙️  Git Configuration"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -61,23 +105,27 @@ EOF
     echo "   Email: $git_email"
 }
 
-# Create backup directory with timestamp
+# Create backup directory with timestamp (shared across all tools)
 BACKUP_DIR="$HOME/.dotfiles_backup_$(date +%Y%m%d_%H%M%S)"
 BACKUP_CREATED=false
-
-# Check for existing configs and handle conflicts
-CONFIGS_TO_CHECK=(
-    "$HOME/.zshrc"
-    "$HOME/.gitconfig"
-    "$HOME/.gitignore_global"
-    "$HOME/.vimrc"
-    "$HOME/.config/ghostty/config"
-    "$HOME/.config/k9s/config.yaml"
-)
 
 # Function to handle a single conflicting file
 handle_conflict() {
     local config="$1"
+
+    if [ "$AUTO_BACKUP" = true ]; then
+        if [ "$BACKUP_CREATED" = false ]; then
+            mkdir -p "$BACKUP_DIR"
+            BACKUP_CREATED=true
+            echo "📦 Backup directory: $BACKUP_DIR"
+        fi
+        mkdir -p "$BACKUP_DIR/$(dirname "$config")"
+        cp -r "$config" "$BACKUP_DIR/$config"
+        rm -rf "$config"
+        echo "   ✅ Auto-backed up and removed: $config"
+        return
+    fi
+
     echo ""
     echo "⚠️  Conflict: $config already exists"
     echo "   [b] Back up and remove"
@@ -107,34 +155,38 @@ handle_conflict() {
     esac
 }
 
-# Check each config for conflicts
-for config in "${CONFIGS_TO_CHECK[@]}"; do
-    if [ -e "$config" ] && [ ! -L "$config" ]; then
-        handle_conflict "$config"
-    fi
+# ── Item registry ──────────────────────────────────────────────────
+
+# Auto-detect configs from configs/ directory
+for dir in "$SCRIPT_DIR"/configs/*/; do
+    tool=$(basename "$dir")
+    add_item "$tool" "$(get_tool_desc "$tool")"
 done
 
-# Prompt for git personalization
-prompt_git_config
+# ── Per-tool deploy loop ───────────────────────────────────────────
 
-# Get the directory where this script is located
-DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$DOTFILES_DIR"
-
-# List of tool directories to stow
-TOOLS=(
-    zsh
-    git
-    vim
-    ghostty
-    k9s
-)
+cd "$SCRIPT_DIR"
 
 echo ""
-echo "🔗 Creating symlinks..."
 
-for tool in "${TOOLS[@]}"; do
-    if [ -d "$tool" ]; then
+for tool in "${MENU_ITEMS[@]}"; do
+    if ! confirm_item "$tool" "Deploy"; then
+        continue
+    fi
+
+    # Detect and handle conflicts via stow dry run
+    detect_conflicts "$tool"
+    for config in "${CONFLICTS[@]}"; do
+        handle_conflict "$config"
+    done
+
+    # Git personalization
+    if [ "$tool" = "git" ]; then
+        prompt_git_config
+    fi
+
+    # Stow
+    if [ -d "configs/$tool" ]; then
         echo "  📁 Stowing $tool..."
         stow -v "$tool"
     else
@@ -154,4 +206,6 @@ echo ""
 echo "Next steps:"
 echo "  1. Restart your shell: exec zsh"
 echo "  2. Verify configs are working correctly"
-echo "  3. Delete backup if no longer needed: rm -rf $BACKUP_DIR"
+if [ "$BACKUP_CREATED" = true ]; then
+    echo "  3. Delete backup if no longer needed: rm -rf $BACKUP_DIR"
+fi
