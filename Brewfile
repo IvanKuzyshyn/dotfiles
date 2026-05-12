@@ -9,6 +9,7 @@ brew "k9s"
 brew "kubectl"
 brew "awscli"
 brew "mise"
+brew "gitleaks"
 
 cask "ghostty"
 cask "raycast"
