@@ -1,3 +1,6 @@
 # IDEs
 .idea/
 .vscode/
+
+# Claude hook logs
+*.jsonl
