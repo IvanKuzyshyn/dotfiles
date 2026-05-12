@@ -25,7 +25,7 @@ get_tool_desc() {
         vim)     echo "editor configuration" ;;
         ghostty) echo "terminal emulator" ;;
         k9s)     echo "Kubernetes UI" ;;
-        claude)  echo "AI assistant settings" ;;
+        claude)  echo "Claude settings" ;;
         mise)    echo "dev tools and env manager" ;;
         *)       echo "" ;;
     esac
@@ -192,6 +192,20 @@ for tool in "${MENU_ITEMS[@]}"; do
     else
         echo "  ⚠️  Skipping $tool (directory not found)"
     fi
+
+    # Copy .sample files to their final names (e.g. foo.sample.md → foo.md)
+    # Search the stow source directory and compute the $HOME target paths
+    while IFS= read -r sample_src; do
+        rel="${sample_src#configs/$tool/}"
+        sample_dest="$HOME/$rel"
+        target_dest="${sample_dest/.sample/}"
+        if [ ! -f "$target_dest" ]; then
+            cp "$sample_dest" "$target_dest"
+            echo "  📝 Created $(basename "$target_dest") from template"
+        else
+            echo "  ✅ $(basename "$target_dest") already exists, keeping current version"
+        fi
+    done < <(find "configs/$tool" -name "*.sample.*" 2>/dev/null || true)
 done
 
 echo ""
