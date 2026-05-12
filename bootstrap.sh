@@ -39,7 +39,11 @@ detect_conflicts() {
     local output
     output=$(stow -n -v "$tool" 2>&1) || true
     while IFS= read -r line; do
+        # Pattern 1: "existing target is not owned by stow: <path>"
         if [[ "$line" =~ "existing target is not owned by stow: "(.*) ]]; then
+            CONFLICTS+=("$HOME/${BASH_REMATCH[1]}")
+        # Pattern 2: "cannot stow ... over existing target <path> since neither a link nor a directory"
+        elif [[ "$line" =~ "over existing target "(.*)" since" ]]; then
             CONFLICTS+=("$HOME/${BASH_REMATCH[1]}")
         fi
     done <<< "$output"
@@ -193,8 +197,8 @@ for tool in "${MENU_ITEMS[@]}"; do
         echo "  ⚠️  Skipping $tool (directory not found)"
     fi
 
-    # Copy .sample files to their final names (e.g. foo.sample.md → foo.md)
-    # Search the stow source directory and compute the $HOME target paths
+    # Process .sample files: copy or merge into their final names
+    # e.g. foo.sample.json → foo.json, bar.sample.md → bar.md
     while IFS= read -r sample_src; do
         rel="${sample_src#configs/$tool/}"
         sample_dest="$HOME/$rel"
@@ -202,6 +206,35 @@ for tool in "${MENU_ITEMS[@]}"; do
         if [ ! -f "$target_dest" ]; then
             cp "$sample_dest" "$target_dest"
             echo "  📝 Created $(basename "$target_dest") from template"
+        elif [[ "$target_dest" == *.json ]] && command -v jq &>/dev/null; then
+            # Deep-merge JSON: sample as base, existing user file wins on conflicts,
+            # arrays are combined with duplicates removed
+            merged=$(jq -s '
+                def deep_merge:
+                    . as [$a, $b] |
+                    if ($a | type) == "object" and ($b | type) == "object" then
+                        ($a | keys_unsorted) + ($b | keys_unsorted) | unique |
+                        map(. as $k |
+                            if ($a | has($k)) and ($b | has($k)) then
+                                {($k): ([$a[$k], $b[$k]] | deep_merge)}
+                            elif ($b | has($k)) then {($k): $b[$k]}
+                            else {($k): $a[$k]}
+                            end
+                        ) | add // {}
+                    elif ($a | type) == "array" and ($b | type) == "array" then
+                        ($a + $b) | unique
+                    elif $b != null then $b
+                    else $a
+                    end;
+                deep_merge
+            ' "$sample_dest" "$target_dest" 2>/dev/null)
+
+            if [ $? -eq 0 ] && [ -n "$merged" ]; then
+                echo "$merged" > "$target_dest"
+                echo "  🔀 Merged $(basename "$target_dest") (your settings take precedence)"
+            else
+                echo "  ⚠️  Could not merge $(basename "$target_dest"), keeping existing version"
+            fi
         else
             echo "  ✅ $(basename "$target_dest") already exists, keeping current version"
         fi
