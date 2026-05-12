@@ -19,11 +19,12 @@ echo "✅ Platform: macOS"
 
 # ── Item registry ──────────────────────────────────────────────────
 
-add_item "homebrew-tools" "15 packages via Brewfile"
+add_item "homebrew-tools" "16 packages via Brewfile"
 add_item "rust"           "via rustup"
 add_item "oh-my-zsh"      "zsh framework"
 add_item "nvm"            "Node.js version manager"
 add_item "claude-code"    "AI coding assistant"
+add_item "git-hooks"      "pre-commit secret scanning for this repo (gitleaks)"
 
 # ── Installation ────────────────────────────────────────────────────
 
@@ -125,6 +126,16 @@ if confirm_item "claude-code"; then
         echo "✅ Claude Code installed"
     else
         echo "⚠️  Skipping Claude Code: npm not found (install nvm first to get Node.js)"
+    fi
+fi
+
+# Configure pre-commit hook for this repo (points git at tracked .githooks/)
+if confirm_item "git-hooks"; then
+    if ! command -v gitleaks &> /dev/null; then
+        echo "⚠️  Skipping git-hooks: gitleaks not installed (run homebrew-tools first)"
+    else
+        git -C "$SCRIPT_DIR" config core.hooksPath .githooks
+        echo "✅ Pre-commit hook enabled for this repo (core.hooksPath = .githooks)"
     fi
 fi
 

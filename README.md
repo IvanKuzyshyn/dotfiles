@@ -73,6 +73,7 @@ The `install.sh` script installs all required tools:
 - ncdu (Disk usage analyzer)
 - git, go (Development)
 - mise (Dev tools & env manager)
+- gitleaks (Secret scanning for pre-commit + CI)
 - Ghostty (Terminal emulator)
 - Raycast (Productivity launcher)
 - Cursor (AI code editor)
@@ -110,12 +111,35 @@ ls -la ~ | grep "^l"
 
 You should see symlinks for `.zshrc`, `.gitconfig`, `.vimrc`, etc.
 
+## Secret Scanning
+
+This repository ships with [gitleaks](https://github.com/gitleaks/gitleaks) wired
+into two layers to prevent accidental commits of tokens, API keys, or other
+sensitive data:
+
+- **Pre-commit hook** (`.githooks/pre-commit`) — scans staged changes with
+  `gitleaks protect --staged --redact`. Enabled for this repo by
+  `./install.sh` (item: `git-hooks`), which runs
+  `git config core.hooksPath .githooks` locally — no global config is touched.
+- **GitHub Actions** (`.github/workflows/gitleaks.yml`) — scans every push to
+  `main` and every PR via the official `gitleaks/gitleaks-action`. Acts as a
+  CI safety net for cases where the local hook is bypassed
+  (e.g. `git commit --no-verify`).
+
+If gitleaks reports a false positive, add an allowlist entry to a `.gitleaks.toml`
+at the repo root. The default ruleset is used otherwise.
+
 ## Repository Structure
 
 ```
 dotfiles/
 ├── .gitignore              # Excludes IDE and OS files
 ├── .stowrc                 # Stow configuration
+├── .githooks/
+│   └── pre-commit          # gitleaks scan on staged changes
+├── .github/
+│   └── workflows/
+│       └── gitleaks.yml    # CI secret scan on push/PR
 ├── Brewfile                # Homebrew packages and casks (single source of truth)
 ├── install.sh              # Tool installation script
 ├── bootstrap.sh            # Config deployment script

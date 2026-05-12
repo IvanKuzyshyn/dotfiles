@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Pre-commit hook: scan staged changes for secrets via gitleaks.
+# Enabled for this repo by `git config core.hooksPath .githooks`
+# (configured by install.sh).
+
+set -e
+
+if ! command -v gitleaks &> /dev/null; then
+    echo "❌ gitleaks not installed — secret scan cannot run."
+    echo "   Install with: brew install gitleaks"
+    echo "   Or run:        ./install.sh"
+    exit 1
+fi
+
+gitleaks protect --staged --redact --verbose

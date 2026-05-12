@@ -18,6 +18,11 @@ This is a personal dotfiles repository for managing user configuration files acr
 dotfiles/
 ├── .gitignore              # Excludes IDE/OS files
 ├── .stowrc                 # Stow configuration (dir=configs, target=$HOME)
+├── .githooks/
+│   └── pre-commit          # gitleaks secret scan on staged changes
+├── .github/
+│   └── workflows/
+│       └── gitleaks.yml    # CI secret scan on push/PR
 ├── Brewfile                # Homebrew packages and casks (single source of truth)
 ├── install.sh              # Tool installation via Homebrew
 ├── bootstrap.sh            # Config deployment via Stow
@@ -50,12 +55,13 @@ The repository provides a two-step setup process:
    - Detects platform (macOS only currently)
    - Prompts `[Y/n]` for each tool (Enter = yes, `n` = skip)
    - Installs Homebrew if missing
-   - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go, mise
+   - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go, mise, gitleaks
    - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), docker (Docker Desktop)
    - Installs Rust via rustup
    - Installs oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
    - Installs nvm and Node.js LTS
    - Installs Claude Code via npm
+   - Configures this repo's pre-commit hook (`core.hooksPath=.githooks`) for gitleaks scanning
    - Idempotent (safe to re-run)
    - `--all` flag skips prompts (installs everything)
 
@@ -85,6 +91,7 @@ The repository provides a two-step setup process:
 | Claude Code | npm global | `~/.npm/` or nvm node path |
 | mise | `brew install mise` | Dev tools & env manager |
 | GNU Stow | `brew install stow` | Required for deployment |
+| gitleaks | `brew install gitleaks` | Secret scanning (pre-commit + CI) |
 
 ## Configuration Files
 
@@ -248,6 +255,17 @@ echo "set -g mouse on" > configs/tmux/.tmux.conf
 ./bootstrap.sh
 ```
 
+## Secret Scanning
+
+This repo runs `gitleaks` in two places to prevent accidental commits of tokens, API keys, or other sensitive data:
+
+- **Pre-commit hook** — `.githooks/pre-commit` runs `gitleaks protect --staged --redact --verbose` and blocks the commit on any finding. Enabled per-repo via `git config core.hooksPath .githooks`, set by `./install.sh` (item: `git-hooks`).
+- **GitHub Actions** — `.github/workflows/gitleaks.yml` runs on every push to `main` and every PR. CI safety net in case the local hook is bypassed (e.g. `git commit --no-verify`).
+
+The default gitleaks ruleset is used (no `.gitleaks.toml`). Add allowlists or custom rules to a `.gitleaks.toml` at the repo root if false positives appear.
+
+**Important:** scope is repo-local only. The `core.hooksPath` setting is written to this repo's `.git/config`, never to the global gitconfig.
+
 ## Maintenance Guidelines
 
 ### Modifying Configurations
@@ -266,6 +284,7 @@ echo "set -g mouse on" > configs/tmux/.tmux.conf
 - Sources `lib/menu.sh` for confirmation prompts
 - Brew tools managed via `Brewfile` (not arrays in install.sh)
 - Non-brew tools (rust, oh-my-zsh, nvm, claude-code) have dedicated install blocks
+- `git-hooks` item runs `git config core.hooksPath .githooks` (scoped to this repo only)
 - Each tool confirmed inline via `confirm_item` before its install block
 - Supports `--all` flag to skip prompts (install everything)
 
