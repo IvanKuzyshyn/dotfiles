@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -154,7 +155,7 @@ func TestSink_ConcurrentSendAndResolve(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(2 * N)
 	for i := 0; i < N; i++ {
-		path := time.Now().Format("15:04:05.000000000") + "-" + itoa(i)
+		path := strconv.Itoa(i)
 		ch := make(chan event.ConflictAction, 1)
 
 		go func() {
@@ -178,6 +179,16 @@ func TestSink_ConcurrentSendAndResolve(t *testing.T) {
 			for {
 				if _, ok := s.resolvers.Load(path); ok {
 					s.Resolve(path, event.ConflictSkip)
+					// Cross-talk check: the resolution must land on this
+					// iteration's own channel, not some other path's.
+					select {
+					case got := <-ch:
+						if got != event.ConflictSkip {
+							t.Errorf("path %s got %v, want ConflictSkip", path, got)
+						}
+					case <-time.After(time.Second):
+						t.Errorf("path %s: resolver channel never received", path)
+					}
 					return
 				}
 				if time.Now().After(deadline) {
@@ -189,19 +200,4 @@ func TestSink_ConcurrentSendAndResolve(t *testing.T) {
 		}()
 	}
 	wg.Wait()
-}
-
-// itoa avoids pulling in strconv for the concurrent test's path-builder.
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	var buf [20]byte
-	i := len(buf)
-	for n > 0 {
-		i--
-		buf[i] = byte('0' + n%10)
-		n /= 10
-	}
-	return string(buf[i:])
 }
