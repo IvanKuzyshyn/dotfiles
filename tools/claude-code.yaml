@@ -1,0 +1,8 @@
+name: claude-code
+description: AI coding assistant CLI
+platforms: [darwin, linux]
+depends_on: [nvm]
+steps:
+  - type: npm_global
+    name: install claude-code
+    package: '@anthropic-ai/claude-code'
