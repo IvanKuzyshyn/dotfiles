@@ -121,20 +121,3 @@ func (a App) View() string {
 }
 
 var headerStyle = lipgloss.NewStyle().Bold(true)
-
-// --- Placeholder sub-models ---------------------------------------------
-//
-// The real ConflictModal type arrives in Task 42. RunnerPane is now defined
-// in runner_pane.go. The stub below exists only so the App compiles and the
-// shell's routing can be tested in isolation. It mirrors the Bubble Tea
-// Update/View shape but returns its own concrete type so the App can store
-// updated values without type assertions.
-
-// ConflictModal is replaced by a real overlay in Task 42.
-type ConflictModal struct{}
-
-// Update is a no-op pending the real implementation.
-func (c ConflictModal) Update(_ tea.Msg) (ConflictModal, tea.Cmd) { return c, nil }
-
-// View returns a placeholder string.
-func (c ConflictModal) View() string { return "conflict modal placeholder" }
