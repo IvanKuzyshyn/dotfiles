@@ -1352,21 +1352,21 @@ dotfiles/
 
 - [x] **Step 3: Commit `Add runner pane`**
 
-### Task 42: Conflict modal
+### Task 42: Conflict modal ✓ done in commit `5191a06`
 
 **Files:**
 - Create: `internal/tui/conflict_modal.go`
 - Create: `internal/tui/conflict_modal_test.go`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   - Triggered by `RunEventMsg{Kind: ConflictPrompt}`. Modal overlays current screen.
   - Renders: target path, existing kind, four choices (Backup / Overwrite / Skip / Abort), `Apply to remaining` toggle.
   - Selection: `↑/↓` navigate, `space` toggle apply-to-remaining, `enter` confirm — sends `ConflictResolutionMsg` containing the choice; app forwards to resolver channel via TUISink.
 
-- [ ] **Step 2: teatest**
+- [x] **Step 2: teatest**
   Send `ConflictPrompt`, send `↓ ↓ enter`; assert `ConflictResolutionMsg` payload is the third choice.
 
-- [ ] **Step 3: Commit `Add conflict modal`**
+- [x] **Step 3: Commit `Add conflict modal`**
 
 ### Task 43: TUISink
 
