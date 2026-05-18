@@ -1335,22 +1335,22 @@ dotfiles/
 
 - [x] **Step 3: Commit `Add picker screen`**
 
-### Task 41: Runner pane (split status + logs)
+### Task 41: Runner pane (split status + logs) ✓ done in commit `63c4902`
 
 **Files:**
 - Create: `internal/tui/runner_pane.go`
 - Create: `internal/tui/runner_pane_test.go`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   - Left: list of tools with status icons (spinner during run, ✓/✗/~ when done).
   - Right: rolling log buffer for the currently focused tool (last ~200 lines).
   - Keys: `Tab` cycle focus, `l` open full log for finished tool (pages a `viewport`), `r` retry failed (only on screen `summary`).
   - Receives events via `RunEventMsg{event.Event}` from the TUISink.
 
-- [ ] **Step 2: teatest snapshots**
+- [x] **Step 2: teatest snapshots**
   Feed a synthetic event stream (`ToolStarted`, `LogLine`×3, `ToolFinished`); assert rendering shows expected status and last log lines.
 
-- [ ] **Step 3: Commit `Add runner pane`**
+- [x] **Step 3: Commit `Add runner pane`**
 
 ### Task 42: Conflict modal
 
