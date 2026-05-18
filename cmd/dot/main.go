@@ -17,6 +17,7 @@ func main() {
 	root := cli.NewRoot(g)
 	root.AddCommand(cli.NewListCmd(g))
 	root.AddCommand(cli.NewInstallCmd(g))
+	root.AddCommand(cli.NewUpdateCmd(g))
 	root.AddCommand(cli.NewDeployCmd(g))
 	root.AddCommand(cli.NewStatusCmd(g))
 	root.AddCommand(cli.NewVersionCmd(version))
