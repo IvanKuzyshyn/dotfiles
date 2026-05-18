@@ -1701,12 +1701,12 @@ dotfiles/
 
 - [x] **Step 2: Commit `Add macOS integration workflow`**
 
-### Task 59: Replace `install.sh` with curl bootstrap
+### Task 59: Replace `install.sh` with curl bootstrap ✓ done in commit `1252da1`
 
 **Files:**
 - Modify: `install.sh` (full rewrite)
 
-- [ ] **Step 1: Write bootstrap script**
+- [x] **Step 1: Write bootstrap script**
   ```bash
   #!/usr/bin/env bash
   set -euo pipefail
@@ -1731,16 +1731,16 @@ dotfiles/
   case ":$PATH:" in *":$PREFIX:"*) ;; *) echo "Add to PATH: export PATH=\"$PREFIX:\$PATH\"" ;; esac
   ```
 
-- [ ] **Step 2: Update README install section**
+- [x] **Step 2: Update README install section**
   ```
   curl -fsSL https://github.com/ivankuzyshyn/dotfiles/releases/latest/download/install.sh | sh
   ```
   Make sure Goreleaser publishes `install.sh` as a release asset (`extra_files` in `.goreleaser.yaml`); update goreleaser config accordingly.
 
-- [ ] **Step 3: Tag a pre-release**
+- [ ] **Step 3: Tag a pre-release** *(manual user action — out of scope for this commit)*
   Manually: `git tag v0.0.1-rc1 && git push origin v0.0.1-rc1`. Wait for release workflow. On a fresh user account or VM, run the curl line and verify `dot version` prints `0.0.1-rc1`.
 
-- [ ] **Step 4: Commit `Replace install.sh with curl bootstrap`**
+- [x] **Step 4: Commit `Replace install.sh with curl bootstrap`**
 
 **Phase 5 complete.** Ship.
 
