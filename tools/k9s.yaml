@@ -1,0 +1,7 @@
+name: k9s
+description: k9s Kubernetes TUI config
+platforms: [darwin, linux]
+depends_on: [homebrew]
+configs:
+  - source: k9s
+    target: ~
