@@ -22,7 +22,6 @@ type Exec interface {
 // Error wraps command execution errors with exit code information.
 type Error struct {
 	ExitCode int
-	Stderr   string
 	err      error // underlying *exec.ExitError
 }
 
@@ -59,6 +58,7 @@ func (Real) Run(ctx context.Context, cmd string, args []string, env []string, si
 
 	// Stream output line-by-line to the sink.
 	scanner := bufio.NewScanner(out)
+	scanner.Buffer(make([]byte, 64*1024), 1024*1024) // grow up to 1MB
 	for scanner.Scan() {
 		sink.Line(scanner.Text())
 	}
