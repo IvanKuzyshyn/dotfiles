@@ -1,0 +1,9 @@
+name: homebrew
+description: Homebrew package manager + packages from Brewfile
+platforms: [darwin]
+steps:
+  - type: homebrew_bootstrap
+    name: bootstrap homebrew
+  - type: brewfile
+    name: install Brewfile packages
+    path: Brewfile
