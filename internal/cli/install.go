@@ -128,11 +128,11 @@ func runInstall(ctx context.Context, errw io.Writer, g *GlobalFlags, args []stri
 	result := runner.Run(ctx, plan, env, sink)
 
 	// 10. Summary
-	s, sk, failed := result.Counts()
-	fmt.Fprintf(os.Stderr, "\nsucceeded=%d skipped=%d failed=%d\n", s, sk, failed)
+	logPath := ""
 	if logErr == nil {
-		fmt.Fprintf(os.Stderr, "log: %s\n", logSink.Path())
+		logPath = logSink.Path()
 	}
+	fmt.Fprint(os.Stderr, FormatSummary(result, logPath))
 	if result.AnyFailed() {
 		return preflightErr{msg: "one or more tools failed", code: 1}
 	}
