@@ -15,6 +15,7 @@ var version = "dev"
 func main() {
 	g := &cli.GlobalFlags{}
 	root := cli.NewRoot(g)
+	root.AddCommand(cli.NewListCmd(g))
 	// Subcommands attached in Tasks 20-22 (list, install, version).
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
