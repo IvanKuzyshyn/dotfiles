@@ -1613,7 +1613,7 @@ dotfiles/
 
 - [x] **Step 3: Commit `Add migration parity test`**
 
-### Task 54: Delete bash scripts
+### Task 54: Delete bash scripts ✓ done in commit `c2785aa`
 
 **Files:**
 - Delete: `bootstrap.sh`
@@ -1622,7 +1622,7 @@ dotfiles/
 - Delete: `.stowrc`
 - Modify: `.githooks/pre-commit` (only if it references any deleted file)
 
-- [ ] **Step 1: Verify replacement is feature-complete**
+- [x] **Step 1: Verify replacement is feature-complete**
   Run smoke against the manifests:
   ```bash
   make build
@@ -1630,15 +1630,15 @@ dotfiles/
   ./bin/dot install --all --on-conflict=backup
   ./bin/dot deploy --all --on-conflict=backup
   ```
-- [ ] **Step 2: Delete files**
+- [x] **Step 2: Delete files**
   ```bash
   git rm bootstrap.sh lib/menu.sh .stowrc
   rmdir lib 2>/dev/null || true
   ```
-- [ ] **Step 3: Check `.githooks/pre-commit`**
+- [x] **Step 3: Check `.githooks/pre-commit`**
   Read and confirm no references to deleted paths. If references exist, fix them.
 
-- [ ] **Step 4: Commit `Remove legacy bash scripts and .stowrc`**
+- [x] **Step 4: Commit `Remove legacy bash scripts and .stowrc`**
 
 ### Task 55: Rewrite README
 
