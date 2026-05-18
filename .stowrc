@@ -1,4 +1,0 @@
---dir=configs
---target=$HOME
---ignore=.DS_Store
---ignore=README.md
