@@ -29,8 +29,8 @@ func Validate(tools []Tool, knownTypes []string) error {
 		if t.Name == "" {
 			continue // already reported
 		}
-		if len(t.Steps) == 0 {
-			errs = append(errs, fmt.Errorf("tool %q: no steps", t.Name))
+		if len(t.Steps) == 0 && len(t.Configs) == 0 {
+			errs = append(errs, fmt.Errorf("tool %q: no steps or configs", t.Name))
 		}
 		for j, s := range t.Steps {
 			if s.Type == "" {

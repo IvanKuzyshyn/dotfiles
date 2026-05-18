@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/ivankuzyshyn/dotfiles/internal/manifest"
+	"github.com/ivankuzyshyn/dotfiles/internal/step"
 	"github.com/ivankuzyshyn/dotfiles/internal/tool"
 )
 
@@ -43,5 +44,20 @@ func TestMigrationParity_ClaudeTracked(t *testing.T) {
 	}
 	if _, ok := reg.Get("claude"); !ok {
 		t.Errorf("tool %q is missing from the registry", "claude")
+	}
+}
+
+// TestMigrationParity_EmbeddedManifestsPassValidation guards against schema
+// drift between the embedded manifests and the validator. Every CLI command
+// except `dot list` runs `manifest.Validate` before dispatching, so a
+// validation regression here breaks the binary end-to-end even though
+// `LoadEmbedded` and `NewRegistry` succeed.
+func TestMigrationParity_EmbeddedManifestsPassValidation(t *testing.T) {
+	manifests, err := manifest.LoadEmbedded()
+	if err != nil {
+		t.Fatalf("LoadEmbedded: %v", err)
+	}
+	if err := manifest.Validate(manifests, step.RegisteredTypes()); err != nil {
+		t.Fatalf("Validate: %v", err)
 	}
 }

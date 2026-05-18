@@ -18,12 +18,21 @@ func TestValidate_MissingName(t *testing.T) {
 	}
 }
 
-func TestValidate_NoSteps(t *testing.T) {
+func TestValidate_NoStepsOrConfigs(t *testing.T) {
 	err := manifest.Validate([]manifest.Tool{
 		{Name: "x"},
 	}, knownTypes)
-	if err == nil || !strings.Contains(err.Error(), "no steps") {
-		t.Errorf("expected no-steps error, got %v", err)
+	if err == nil || !strings.Contains(err.Error(), "no steps or configs") {
+		t.Errorf("expected no-steps-or-configs error, got %v", err)
+	}
+}
+
+func TestValidate_ConfigOnlyToolIsValid(t *testing.T) {
+	err := manifest.Validate([]manifest.Tool{
+		{Name: "x", Configs: []manifest.Config{{Source: "x", Target: "~"}}},
+	}, knownTypes)
+	if err != nil {
+		t.Errorf("expected config-only tool to validate, got %v", err)
 	}
 }
 
