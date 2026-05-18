@@ -12,7 +12,7 @@
 
 **Branch:** Continue on `new-architecture-planning`. Commit after each task; PR when Phase 4 cutover completes.
 
-**Progress (as of commit `998576b`):** Tasks 1–8 complete. Foundation layer in place: Go module + Makefile + CI, `internal/platform`, `internal/exec` (real + fake), `internal/fs` (real + fake), `internal/event` (types, StreamSink, LogFileSink, Tee). All tests pass. Next up: Task 9 (manifest schema).
+**Progress (as of commit `fe14141`):** Tasks 1–9 complete. Foundation layer in place: Go module + Makefile + CI, `internal/platform`, `internal/exec` (real + fake), `internal/fs` (real + fake), `internal/event` (types, StreamSink, LogFileSink, Tee), `internal/manifest` (schema types). All tests pass. Next up: Task 10 (manifest loader with embed and overlay merge).
 
 ---
 
@@ -456,7 +456,7 @@ dotfiles/
   git commit -m "Add event types, StreamSink, LogFileSink, Tee"
   ```
 
-### Task 9: Manifest schema types
+### Task 9: Manifest schema types ✓ done in commit `fe14141`
 
 **Files:**
 - Create: `internal/manifest/schema.go`
