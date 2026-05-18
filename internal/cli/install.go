@@ -20,9 +20,10 @@ import (
 )
 
 type installFlags struct {
-	all    bool
-	tag    string
-	noDeps bool
+	all        bool
+	tag        string
+	noDeps     bool
+	onConflict string
 }
 
 // NewInstallCmd returns the `dot install` subcommand.
@@ -39,6 +40,8 @@ func NewInstallCmd(g *GlobalFlags) *cobra.Command {
 	cmd.Flags().BoolVar(&f.all, "all", false, "install every known tool")
 	cmd.Flags().StringVar(&f.tag, "tag", "", "install tools matching this tag")
 	cmd.Flags().BoolVar(&f.noDeps, "no-deps", false, "do not expand transitive dependencies; fail if any required dep is missing")
+	cmd.Flags().StringVar(&f.onConflict, "on-conflict", "abort",
+		"what to do on a conflict during config deploy: backup|overwrite|skip|abort")
 	return cmd
 }
 
@@ -47,6 +50,11 @@ func runInstall(ctx context.Context, errw io.Writer, g *GlobalFlags, args []stri
 	// Pre-flight: require a selection before doing any IO.
 	if !f.all && f.tag == "" && len(args) == 0 {
 		return wrapPreflight(errors.New("specify one or more tools, --all, or --tag"))
+	}
+
+	action, err := ParseConflictAction(f.onConflict)
+	if err != nil {
+		return wrapPreflight(err)
 	}
 
 	// 1. Load manifests
@@ -114,6 +122,7 @@ func runInstall(ctx context.Context, errw io.Writer, g *GlobalFlags, args []stri
 		sink = streamSink
 		fmt.Fprintf(os.Stderr, "warning: could not open log file: %v\n", logErr)
 	}
+	sink = FlagResolverSink{Inner: sink, Action: action}
 
 	// 9. Run
 	result := runner.Run(ctx, plan, env, sink)
