@@ -149,27 +149,28 @@ dotfiles/
 **Files:**
 - Create: `.github/workflows/ci.yml`
 
-- [ ] **Step 1: Write workflow**
+- [x] **Step 1: Write workflow**
   - Trigger: `push` to `main` and pull requests.
   - Job `build`: matrix `{GOOS: [darwin, linux], GOARCH: [amd64, arm64]}` on `ubuntu-latest`; `go build ./...` (cross-compile validation).
   - Job `test`: `ubuntu-latest`; `go test ./...`; uploads coverage.
   - Job `lint`: `ubuntu-latest`; `golangci-lint-action@v6`.
   - Job `fmt`: `ubuntu-latest`; install `gofumpt` and `goimports`; run `make fmt-check`.
   - All jobs use `actions/setup-go@v5` with `go-version: '1.22'`.
+  - Added `permissions: contents: read` (code-review fix).
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
   ```bash
   git add .github/workflows/ci.yml
   git commit -m "Add CI workflow for build, test, lint, fmt-check"
   ```
 
-### Task 3: Platform detection
+### Task 3: Platform detection ✓ done in commit `5e83f8e`
 
 **Files:**
 - Create: `internal/platform/platform.go`
 - Create: `internal/platform/platform_test.go`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
   ```go
   package platform_test
 
@@ -199,10 +200,10 @@ dotfiles/
   }
   ```
 
-- [ ] **Step 2: Run, expect FAIL (no package)**
+- [x] **Step 2: Run, expect FAIL (no package)**
   Run: `go test ./internal/platform/...`
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
   ```go
   package platform
 
@@ -228,10 +229,10 @@ dotfiles/
   }
   ```
 
-- [ ] **Step 4: Run, expect PASS**
+- [x] **Step 4: Run, expect PASS**
   Run: `go test ./internal/platform/...`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   ```bash
   git add internal/platform/
   git commit -m "Add platform detection"
