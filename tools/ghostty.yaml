@@ -1,0 +1,6 @@
+name: ghostty
+description: Ghostty terminal config
+platforms: [darwin]
+configs:
+  - source: ghostty
+    target: ~
