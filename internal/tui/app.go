@@ -67,13 +67,19 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		a.height = m.Height
 		// Forward to every sub-model so they can size themselves
 		// regardless of which one is currently visible.
-		a.picker, _ = a.picker.Update(msg)
-		a.runner, _ = a.runner.Update(msg)
+		var cmds []tea.Cmd
+		var c tea.Cmd
+		a.picker, c = a.picker.Update(msg)
+		cmds = append(cmds, c)
+		a.runner, c = a.runner.Update(msg)
+		cmds = append(cmds, c)
 		if a.modal != nil {
-			updated, _ := a.modal.Update(msg)
+			var updated ConflictModal
+			updated, c = a.modal.Update(msg)
 			*a.modal = updated
+			cmds = append(cmds, c)
 		}
-		return a, nil
+		return a, tea.Batch(cmds...)
 	}
 
 	// Modal, when visible, swallows everything else.
