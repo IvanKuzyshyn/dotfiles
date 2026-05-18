@@ -1640,12 +1640,12 @@ dotfiles/
 
 - [x] **Step 4: Commit `Remove legacy bash scripts and .stowrc`**
 
-### Task 55: Rewrite README
+### Task 55: Rewrite README ✓ done in commit `7098551`
 
 **Files:**
 - Modify: `README.md`
 
-- [ ] **Step 1: Rewrite**
+- [x] **Step 1: Rewrite**
   New sections:
   - Install (curl bootstrap, deferred to Phase 5 for the actual URL; placeholder note for now)
   - Usage (`dot`, `dot install`, `dot deploy`, `dot status`)
@@ -1653,7 +1653,7 @@ dotfiles/
   - Configuration files (preserved `configs/` layout)
   - Tooling (Makefile targets, CI)
 
-- [ ] **Step 2: Commit `Rewrite README for dot binary`**
+- [x] **Step 2: Commit `Rewrite README for dot binary`**
 
 **Phase 4 complete.** This is a natural PR boundary. Push the branch and open a PR titled "Rewrite dotfiles installer as `dot` Go binary."
 
