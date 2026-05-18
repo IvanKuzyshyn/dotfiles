@@ -1436,12 +1436,12 @@ dotfiles/
 
 **Working software at end of phase:** every legacy tool exists as a manifest. New binary fully replaces bash. Migration test passes.
 
-### Task 46: `tools/homebrew.yaml`
+### Task 46: `tools/homebrew.yaml` ✓ done in commit `d274ade`
 
 **Files:**
 - Create: `tools/homebrew.yaml`
 
-- [ ] **Step 1: Write manifest**
+- [x] **Step 1: Write manifest**
   ```yaml
   name: homebrew
   description: Homebrew package manager + packages from Brewfile
@@ -1453,14 +1453,14 @@ dotfiles/
       name: install Brewfile packages
       path: Brewfile
   ```
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
-### Task 47: `tools/rust.yaml`
+### Task 47: `tools/rust.yaml` ✓ done in commit `7b7b3e4`
 
 **Files:**
 - Create: `tools/rust.yaml`
 
-- [ ] **Step 1: Write manifest**
+- [x] **Step 1: Write manifest**
   ```yaml
   name: rust
   description: Rust toolchain via rustup
@@ -1472,14 +1472,14 @@ dotfiles/
       install: |
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
   ```
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
-### Task 48: `tools/oh-my-zsh.yaml`
+### Task 48: `tools/oh-my-zsh.yaml` ✓ done in commit `9854609`
 
 **Files:**
 - Create: `tools/oh-my-zsh.yaml`
 
-- [ ] **Step 1: Write manifest**
+- [x] **Step 1: Write manifest**
   ```yaml
   name: oh-my-zsh
   description: Zsh framework with plugins
@@ -1500,14 +1500,14 @@ dotfiles/
       url: https://github.com/zsh-users/zsh-syntax-highlighting
       dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
   ```
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
-### Task 49: `tools/nvm.yaml`
+### Task 49: `tools/nvm.yaml` ✓ done in commit `09a53b5`
 
 **Files:**
 - Create: `tools/nvm.yaml`
 
-- [ ] **Step 1: Write manifest**
+- [x] **Step 1: Write manifest**
   ```yaml
   name: nvm
   description: Node Version Manager with Node LTS
@@ -1527,14 +1527,14 @@ dotfiles/
         nvm install --lts
         nvm use --lts
   ```
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
-### Task 50: `tools/claude-code.yaml`
+### Task 50: `tools/claude-code.yaml` ✓ done in commit `8b28dab`
 
 **Files:**
 - Create: `tools/claude-code.yaml`
 
-- [ ] **Step 1: Write manifest**
+- [x] **Step 1: Write manifest**
   ```yaml
   name: claude-code
   description: AI coding assistant CLI
@@ -1545,14 +1545,14 @@ dotfiles/
       name: install claude-code
       package: '@anthropic-ai/claude-code'
   ```
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
-### Task 51: `tools/git-hooks.yaml`
+### Task 51: `tools/git-hooks.yaml` ✓ done in commit `95a8139`
 
 **Files:**
 - Create: `tools/git-hooks.yaml`
 
-- [ ] **Step 1: Write manifest**
+- [x] **Step 1: Write manifest**
   ```yaml
   name: git-hooks
   description: Pre-commit gitleaks scanning for this repo
@@ -1565,9 +1565,9 @@ dotfiles/
       value: .githooks
       scope: repo
   ```
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
-### Task 52: Config-bearing tool manifests
+### Task 52: Config-bearing tool manifests ✓ done in commit `70655ab`
 
 **Files:**
 - Create: `tools/git.yaml`
@@ -1576,8 +1576,9 @@ dotfiles/
 - Create: `tools/ghostty.yaml`
 - Create: `tools/k9s.yaml`
 - Create: `tools/mise.yaml`
+- Create: `tools/claude.yaml` (added to cover the existing `configs/claude/` directory)
 
-- [ ] **Step 1: Write each manifest**
+- [x] **Step 1: Write each manifest**
   Each follows the same shape. Example for `git`:
   ```yaml
   name: git
@@ -1588,8 +1589,9 @@ dotfiles/
     - source: git
       target: ~
   ```
-  `zsh`, `vim` similar (`target: ~`). `ghostty`, `k9s`, `mise` use `target: ~/.config/<tool>` matching the existing `configs/<tool>/.config/<tool>/` layout. Note: `configs/git/.gitconfig` → symlinked to `~/.gitconfig`; the linker walks `configs/git/` and creates each leaf.
-- [ ] **Step 2: Commit each**
+  `zsh`, `vim` similar (`target: ~`). For `ghostty`, `k9s`, `mise`, `claude` the existing layout is `configs/<tool>/.config/<tool>/...` (or `.claude/...`), so `target: ~` is correct: the linker walks each leaf under `configs/<tool>/` and creates `~/.config/<tool>/<leaf>` (or `~/.claude/<leaf>`). Note: `configs/git/.gitconfig` → symlinked to `~/.gitconfig`; the linker walks `configs/git/` and creates each leaf.
+- [x] **Step 2: Commit each**
+  Commits: `70655ab` (git), `92d27d0` (zsh), `082afd9` (vim), `c2adbcf` (ghostty), `8fddaed` (k9s), `c517bd7` (mise), `3beb2be` (claude).
 
 ### Task 53: Migration parity test
 
