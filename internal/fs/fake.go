@@ -42,6 +42,26 @@ func NewFake() *Fake {
 	}
 }
 
+// CreateFile creates a regular (non-directory, non-symlink) file node at path.
+// Parent directories must already exist (use MkdirAll first).
+func (f *Fake) CreateFile(path string, perm os.FileMode) error {
+	path = pathClean(path)
+	if _, exists := f.nodes[path]; exists {
+		return &os.PathError{Op: "create", Path: path, Err: os.ErrExist}
+	}
+	parent := pathDir(path)
+	if parent != "/" && parent != "" {
+		if _, err := f.getNode(parent); err != nil {
+			return &os.PathError{Op: "create", Path: path, Err: os.ErrNotExist}
+		}
+	}
+	f.nodes[path] = &node{
+		isDir: false,
+		mode:  perm,
+	}
+	return nil
+}
+
 // Stat returns info about the node at path, following symlinks.
 func (f *Fake) Stat(path string) (FileInfo, error) {
 	path = pathClean(path)
