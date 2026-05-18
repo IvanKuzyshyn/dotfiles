@@ -1394,13 +1394,13 @@ dotfiles/
 
 - [x] **Step 3: Commit `Add TUISink event bridge`**
 
-### Task 44: TUI default entry, runner-in-goroutine
+### Task 44: TUI default entry, runner-in-goroutine ✓ done in commit `fe360d1`
 
 **Files:**
 - Modify: `cmd/dot/main.go`
 - Create: `internal/tui/launch.go`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   When `os.Args` has no subcommand AND stdout is a TTY (`golang.org/x/term.IsTerminal`) AND `--non-interactive` not set: `tui.Launch(g)` instead of `root.Execute()`.
   `Launch`:
   - Build registry like CLI does.
@@ -1408,11 +1408,11 @@ dotfiles/
   - On `StartRunMsg`: spawn goroutine running `runner.Run`; pass `TUISink`. When run completes, post a `RunCompletedMsg` to the program.
   - Run program. Exit code from `Result` like the CLI does.
 
-- [ ] **Step 2: Manual TUI smoke**
+- [x] **Step 2: Manual TUI smoke**
   Run: `./bin/dot`
   Expected: picker opens with the example tool. Toggle, enter, watch run.
 
-- [ ] **Step 3: Commit `Wire TUI as default entry`**
+- [x] **Step 3: Commit `Wire TUI as default entry`**
 
 ### Task 45: Phase 3 wrap-up
 
