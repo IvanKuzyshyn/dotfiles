@@ -12,6 +12,8 @@
 
 **Branch:** Continue on `new-architecture-planning`. Commit after each task; PR when Phase 4 cutover completes.
 
+**Progress (as of commit `998576b`):** Tasks 1–8 complete. Foundation layer in place: Go module + Makefile + CI, `internal/platform`, `internal/exec` (real + fake), `internal/fs` (real + fake), `internal/event` (types, StreamSink, LogFileSink, Tee). All tests pass. Next up: Task 9 (manifest schema).
+
 ---
 
 ## Working notes
@@ -238,7 +240,7 @@ dotfiles/
   git commit -m "Add platform detection"
   ```
 
-### Task 4: Exec interface and real implementation
+### Task 4: Exec interface and real implementation ✓ done in commits `1368d71`, `d54b92b`
 
 **Files:**
 - Create: `internal/exec/exec.go`
@@ -293,7 +295,7 @@ dotfiles/
   git commit -m "Add Exec interface and real implementation"
   ```
 
-### Task 5: Fake Exec for tests
+### Task 5: Fake Exec for tests ✓ done in commit `692a86e`
 
 **Files:**
 - Create: `internal/exec/fake.go`
@@ -332,7 +334,7 @@ dotfiles/
   git commit -m "Add scripted Exec fake for unit tests"
   ```
 
-### Task 6: FS interface and real implementation
+### Task 6: FS interface and real implementation ✓ done in commit `4fa986d`
 
 **Files:**
 - Create: `internal/fs/fs.go`
@@ -358,7 +360,7 @@ dotfiles/
   git commit -m "Add FS interface and real implementation"
   ```
 
-### Task 7: Fake FS for tests
+### Task 7: Fake FS for tests ✓ done in commit `9824e60`
 
 **Files:**
 - Create: `internal/fs/fake.go`
@@ -379,7 +381,7 @@ dotfiles/
   git commit -m "Add in-memory FS fake for unit tests"
   ```
 
-### Task 8: Event types, EventSink, StreamSink, per-run log file
+### Task 8: Event types, EventSink, StreamSink, per-run log file ✓ done in commit `998576b`
 
 **Files:**
 - Create: `internal/event/event.go`
