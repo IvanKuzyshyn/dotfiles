@@ -16,9 +16,9 @@ func main() {
 	g := &cli.GlobalFlags{}
 	root := cli.NewRoot(g)
 	root.AddCommand(cli.NewListCmd(g))
-	// Subcommands attached in Tasks 20-22 (list, install, version).
+	root.AddCommand(cli.NewInstallCmd(g))
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
-		os.Exit(1)
+		os.Exit(cli.ExitCode(err))
 	}
 }
