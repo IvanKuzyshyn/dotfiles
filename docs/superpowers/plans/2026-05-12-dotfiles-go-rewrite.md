@@ -12,7 +12,7 @@
 
 **Branch:** Continue on `new-architecture-planning`. Commit after each task; PR when Phase 4 cutover completes.
 
-**Progress (as of commit `f39988e`):** **Phase 1 complete (Tasks 1–23).** Foundation, manifest, step, tool, runner, and CLI layers are in place. `dot list` enumerates known tools; `dot install <name>` runs shell-typed steps with fault tolerance; `dot version` prints the build version. Per-run log files written to `~/.local/state/dot/runs/`. Smoke test (`tools/example.yaml`) passes end-to-end. `go test ./...` green across 9 packages. **Next up: Phase 2, Task 24 (`homebrew_bootstrap` step).**
+**Progress (as of commit `042cb95`):** **Phases 1 and 2 complete (Tasks 1–38).** Foundation, manifest, step (all 8 types: shell, homebrew_bootstrap, brew_package, brew_cask, brewfile, git_clone, npm_global, git_config), tool, runner, linker, and CLI layers in place. `dot list`, `dot install`, `dot update`, `dot deploy`, `dot status`, `dot version` all wired. Linker handles symlinks with conflict resolution (`--on-conflict=backup|overwrite|skip|abort`). Per-run log files at `~/.local/state/dot/runs/`. Formatted end-of-run summary with retry hints. `go test ./...` green across 11 packages. **Next up: Phase 3, Task 39 (TUI app shell with Bubble Tea).**
 
 ---
 
