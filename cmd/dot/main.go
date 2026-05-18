@@ -17,6 +17,7 @@ func main() {
 	root := cli.NewRoot(g)
 	root.AddCommand(cli.NewListCmd(g))
 	root.AddCommand(cli.NewInstallCmd(g))
+	root.AddCommand(cli.NewVersionCmd(version))
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(cli.ExitCode(err))

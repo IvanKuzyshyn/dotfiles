@@ -1,11 +1,12 @@
 GO ?= go
 PKG := ./...
 BIN := bin/dot
+VERSION ?= dev
 
 .PHONY: build test test-int lint fmt fmt-check tidy clean
 
 build:
-	$(GO) build -o $(BIN) ./cmd/dot
+	$(GO) build -ldflags "-X main.version=$(VERSION)" -o $(BIN) ./cmd/dot
 
 test:
 	$(GO) test $(PKG)
