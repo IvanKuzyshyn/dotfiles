@@ -1283,19 +1283,19 @@ dotfiles/
 
 **Working software at end of phase:** running `dot` alone opens a Bubble Tea picker; selected tools run with live split-pane progress and logs; conflicts surface as a modal; `r` retries failed tools.
 
-### Task 39: TUI app shell
+### Task 39: TUI app shell ✓ done in commit `f639d14`
 
 **Files:**
 - Create: `internal/tui/app.go`
 - Create: `internal/tui/app_test.go`
 
-- [ ] **Step 1: Add dependencies**
+- [x] **Step 1: Add dependencies**
   ```bash
   go get github.com/charmbracelet/bubbletea github.com/charmbracelet/lipgloss github.com/charmbracelet/bubbles
   go get github.com/charmbracelet/x/exp/teatest
   ```
 
-- [ ] **Step 2: Write top-level model**
+- [x] **Step 2: Write top-level model**
   ```go
   type screen int
   const (screenPicker screen = iota; screenRunner; screenSummary)
@@ -1314,10 +1314,10 @@ dotfiles/
   ```
   Routes key events to active screen; handles `KeyMsg{q/ctrl+c}` → quit; `WindowSizeMsg` → propagate to sub-models.
 
-- [ ] **Step 3: Basic teatest**
+- [x] **Step 3: Basic teatest**
   Send `tea.WindowSizeMsg{Width:80,Height:24}` then `KeyMsg{Q}`; expect program to exit. Snapshot the initial view.
 
-- [ ] **Step 4: Commit `Add TUI app shell`**
+- [x] **Step 4: Commit `Add TUI app shell`**
 
 ### Task 40: Picker screen
 
