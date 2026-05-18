@@ -1593,12 +1593,12 @@ dotfiles/
 - [x] **Step 2: Commit each**
   Commits: `70655ab` (git), `92d27d0` (zsh), `082afd9` (vim), `c2adbcf` (ghostty), `8fddaed` (k9s), `c517bd7` (mise), `3beb2be` (claude).
 
-### Task 53: Migration parity test
+### Task 53: Migration parity test ✓ done in commit `fb79053`
 
 **Files:**
 - Create: `internal/manifest/migration_test.go`
 
-- [ ] **Step 1: Write test**
+- [x] **Step 1: Write test**
   Pinned list of legacy tools and configs:
   ```go
   var legacyTools = []string{
@@ -1608,10 +1608,10 @@ dotfiles/
   ```
   Test loads embedded manifests + builds registry; asserts `Get(name)` returns non-nil for every legacy tool.
 
-- [ ] **Step 2: Run, expect PASS**
+- [x] **Step 2: Run, expect PASS**
   Run: `go test ./internal/manifest/...`
 
-- [ ] **Step 3: Commit `Add migration parity test`**
+- [x] **Step 3: Commit `Add migration parity test`**
 
 ### Task 54: Delete bash scripts
 
