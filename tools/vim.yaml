@@ -1,0 +1,6 @@
+name: vim
+description: Vim configuration
+platforms: [darwin, linux]
+configs:
+  - source: vim
+    target: ~
