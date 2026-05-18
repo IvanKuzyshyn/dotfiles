@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestList_EmptyRegistry(t *testing.T) {
+func TestList_EmbeddedRegistry(t *testing.T) {
 	g := &GlobalFlags{
 		ConfigDir:   filepath.Join(t.TempDir(), "no-overlay"),
 		DotfilesDir: "",
@@ -21,11 +21,11 @@ func TestList_EmptyRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := buf.String()
-	// The embedded tools/ directory currently only has .gitkeep, so no
-	// .yaml manifests are loaded. With no overlay either, the result
-	// should be the "no tools" message.
-	if !strings.Contains(got, "(no tools found)") {
-		t.Errorf("expected '(no tools found)', got %q", got)
+	// tools/example.yaml is embedded in the binary; it must appear in the list.
+	for _, want := range []string{"NAME", "example", "embedded"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in output:\n%s", want, got)
+		}
 	}
 }
 

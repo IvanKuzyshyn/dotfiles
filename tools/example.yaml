@@ -1,0 +1,7 @@
+name: example
+description: Smoke-test tool, no-op
+platforms: [darwin, linux]
+steps:
+  - type: shell
+    name: echo
+    install: 'echo "hello from dot"'
