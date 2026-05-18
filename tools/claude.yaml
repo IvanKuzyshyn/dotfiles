@@ -1,0 +1,7 @@
+name: claude
+description: Claude Code user configuration
+platforms: [darwin, linux]
+depends_on: [claude-code]
+configs:
+  - source: claude
+    target: ~
