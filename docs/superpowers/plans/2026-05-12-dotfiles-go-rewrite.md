@@ -1681,15 +1681,15 @@ dotfiles/
 
 - [x] **Step 3: Commit `Add Goreleaser config`**
 
-### Task 57: Release workflow
+### Task 57: Release workflow ✓ done in commit `f030bfd`
 
 **Files:**
 - Create: `.github/workflows/release.yml`
 
-- [ ] **Step 1: Write workflow**
+- [x] **Step 1: Write workflow**
   Trigger: tag push `v*`. Steps: checkout (fetch-depth 0), setup-go 1.22, run `goreleaser/goreleaser-action@v6` with token `${{ secrets.GITHUB_TOKEN }}`.
 
-- [ ] **Step 2: Commit `Add release workflow`**
+- [x] **Step 2: Commit `Add release workflow`**
 
 ### Task 58: macOS integration workflow
 
