@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"runtime/debug"
+	"time"
 
 	"github.com/ivankuzyshyn/dotfiles/internal/event"
+	"github.com/ivankuzyshyn/dotfiles/internal/linker"
 	"github.com/ivankuzyshyn/dotfiles/internal/step"
 	"github.com/ivankuzyshyn/dotfiles/internal/tool"
 )
@@ -70,6 +73,7 @@ func (r Result) AnyFailed() bool {
 func Run(ctx context.Context, plan Plan, env step.Env, sink event.Sink) Result {
 	var res Result
 	failed := make(map[string]struct{})
+	backupRoot := filepath.Join(env.HomeDir, ".dotfiles_backup_"+time.Now().UTC().Format("20060102T150405Z"))
 	for _, t := range plan.Tools {
 		// Context cancellation: skip remaining tools.
 		select {
@@ -93,10 +97,64 @@ func Run(ctx context.Context, plan Plan, env step.Env, sink event.Sink) Result {
 			res.Tools = append(res.Tools, ToolResult{Tool: t, State: Failed, Err: err})
 			continue
 		}
+		if len(t.Configs) > 0 {
+			if err := runLinker(ctx, t, env, sink, backupRoot); err != nil {
+				failed[t.Name] = struct{}{}
+				sink.Send(event.Event{Kind: event.ToolFailed, Tool: t.Name, Err: err})
+				res.Tools = append(res.Tools, ToolResult{Tool: t, State: Failed, Err: err})
+				continue
+			}
+		}
 		sink.Send(event.Event{Kind: event.ToolFinished, Tool: t.Name})
 		res.Tools = append(res.Tools, ToolResult{Tool: t, State: Succeeded})
 	}
 	return res
+}
+
+// runLinker handles the post-step deployment phase for one tool's configs.
+// Returns nil on success or an error if any apply or resolver fails.
+func runLinker(ctx context.Context, t *tool.Tool, env step.Env, sink event.Sink, backupRoot string) error {
+	plan, err := linker.Inspect(t.Configs, env)
+	if err != nil {
+		return fmt.Errorf("inspect configs: %w", err)
+	}
+	for _, d := range plan.Decisions {
+		var c *linker.Conflict
+		var action event.ConflictAction
+		if d.Kind == linker.DecideConflict {
+			// Match conflict by target path; plan.Conflicts entries are only
+			// present for DecideConflict decisions so we can't use index.
+			for j := range plan.Conflicts {
+				if plan.Conflicts[j].Target == d.Target {
+					c = &plan.Conflicts[j]
+					break
+				}
+			}
+			if c == nil {
+				return fmt.Errorf("internal: conflict decision without matching Conflict at %s", d.Target)
+			}
+			resolverCh := make(chan event.ConflictAction, 1)
+			sink.Send(event.Event{
+				Kind: event.ConflictPrompt,
+				Tool: t.Name,
+				Conflict: &event.Conflict{
+					TargetPath:   c.Target,
+					ExistingKind: string(c.ExistingKind),
+					Resolver:     resolverCh,
+				},
+			})
+			select {
+			case action = <-resolverCh:
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+			sink.Send(event.Event{Kind: event.ConflictResolved, Tool: t.Name})
+		}
+		if err := linker.Apply(d, c, action, backupRoot, env.FS); err != nil {
+			return fmt.Errorf("apply %s: %w", d.Target, err)
+		}
+	}
+	return nil
 }
 
 // runTool executes one tool's steps. Returns the first step error.

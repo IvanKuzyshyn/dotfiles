@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/ivankuzyshyn/dotfiles/internal/event"
+	xexec "github.com/ivankuzyshyn/dotfiles/internal/exec"
+	xfs "github.com/ivankuzyshyn/dotfiles/internal/fs"
 	"github.com/ivankuzyshyn/dotfiles/internal/manifest"
 	"github.com/ivankuzyshyn/dotfiles/internal/runner"
 	"github.com/ivankuzyshyn/dotfiles/internal/step"
@@ -39,6 +41,19 @@ func (f *fakeStep) Run(_ context.Context, _ step.Env, _ event.Sink) error {
 type collectSink struct{ events []event.Event }
 
 func (c *collectSink) Send(e event.Event) { c.events = append(c.events, e) }
+
+// autoResolveSink auto-resolves ConflictPrompt events with the configured action.
+type autoResolveSink struct {
+	events []event.Event
+	action event.ConflictAction
+}
+
+func (s *autoResolveSink) Send(e event.Event) {
+	s.events = append(s.events, e)
+	if e.Kind == event.ConflictPrompt && e.Conflict != nil && e.Conflict.Resolver != nil {
+		e.Conflict.Resolver <- s.action
+	}
+}
 
 func mkTool(name string, deps []string, steps ...step.Step) *tool.Tool {
 	return &tool.Tool{Name: name, DependsOn: deps, Steps: steps, Configs: []manifest.Config{}}
@@ -151,5 +166,90 @@ func TestRun_EmitsExpectedEvents(t *testing.T) {
 		if kinds[i] != want[i] {
 			t.Errorf("at %d: want %v, got %v", i, want[i], kinds[i])
 		}
+	}
+}
+
+func TestRun_DeploysConfigs_NoConflict(t *testing.T) {
+	fs := xfs.NewFake()
+	fs.MkdirAll("/dotfiles/configs/git", 0o755)
+	fs.CreateFile("/dotfiles/configs/git/.gitconfig", 0o644)
+	env := step.Env{
+		Exec:        xexec.NewFake(),
+		FS:          fs,
+		DotfilesDir: "/dotfiles",
+		HomeDir:     "/home/me",
+	}
+	t1 := &tool.Tool{
+		Name:    "git",
+		Steps:   []step.Step{&fakeStep{name: "noop"}},
+		Configs: []manifest.Config{{Source: "git", Target: "/home/me"}},
+	}
+	sink := &autoResolveSink{action: event.ConflictBackup}
+	r := runner.Run(context.Background(), runner.Plan{Tools: []*tool.Tool{t1}}, env, sink)
+	if r.Tools[0].State != runner.Succeeded {
+		t.Errorf("want succeeded, got %v err=%v", r.Tools[0].State, r.Tools[0].Err)
+	}
+	if _, err := fs.Readlink("/home/me/.gitconfig"); err != nil {
+		t.Errorf("expected symlink at /home/me/.gitconfig: %v", err)
+	}
+}
+
+func TestRun_DeploysConfigs_BackupOnConflict(t *testing.T) {
+	fs := xfs.NewFake()
+	fs.MkdirAll("/dotfiles/configs/git", 0o755)
+	fs.CreateFile("/dotfiles/configs/git/.gitconfig", 0o644)
+	fs.MkdirAll("/home/me", 0o755)
+	fs.CreateFile("/home/me/.gitconfig", 0o644) // existing file, will conflict
+	env := step.Env{
+		Exec:        xexec.NewFake(),
+		FS:          fs,
+		DotfilesDir: "/dotfiles",
+		HomeDir:     "/home/me",
+	}
+	t1 := &tool.Tool{
+		Name:    "git",
+		Steps:   []step.Step{&fakeStep{name: "noop"}},
+		Configs: []manifest.Config{{Source: "git", Target: "/home/me"}},
+	}
+	sink := &autoResolveSink{action: event.ConflictBackup}
+	r := runner.Run(context.Background(), runner.Plan{Tools: []*tool.Tool{t1}}, env, sink)
+	if r.Tools[0].State != runner.Succeeded {
+		t.Errorf("want succeeded, got %v err=%v", r.Tools[0].State, r.Tools[0].Err)
+	}
+	if _, err := fs.Readlink("/home/me/.gitconfig"); err != nil {
+		t.Errorf("symlink missing: %v", err)
+	}
+	sawPrompt := false
+	for _, e := range sink.events {
+		if e.Kind == event.ConflictPrompt {
+			sawPrompt = true
+		}
+	}
+	if !sawPrompt {
+		t.Error("expected ConflictPrompt event")
+	}
+}
+
+func TestRun_DeploysConfigs_AbortFailsTool(t *testing.T) {
+	fs := xfs.NewFake()
+	fs.MkdirAll("/dotfiles/configs/git", 0o755)
+	fs.CreateFile("/dotfiles/configs/git/.gitconfig", 0o644)
+	fs.MkdirAll("/home/me", 0o755)
+	fs.CreateFile("/home/me/.gitconfig", 0o644)
+	env := step.Env{
+		Exec:        xexec.NewFake(),
+		FS:          fs,
+		DotfilesDir: "/dotfiles",
+		HomeDir:     "/home/me",
+	}
+	t1 := &tool.Tool{
+		Name:    "git",
+		Steps:   []step.Step{&fakeStep{name: "noop"}},
+		Configs: []manifest.Config{{Source: "git", Target: "/home/me"}},
+	}
+	sink := &autoResolveSink{action: event.ConflictAbort}
+	r := runner.Run(context.Background(), runner.Plan{Tools: []*tool.Tool{t1}}, env, sink)
+	if r.Tools[0].State != runner.Failed {
+		t.Errorf("want failed (abort), got %v", r.Tools[0].State)
 	}
 }
