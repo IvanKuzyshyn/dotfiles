@@ -55,7 +55,7 @@ func runDeploy(ctx context.Context, errw io.Writer, g *GlobalFlags, args []strin
 		return wrapPreflight(err)
 	}
 
-	manifests, err := loadAllManifests(g)
+	manifests, err := LoadAllManifests(g)
 	if err != nil {
 		return wrapPreflight(err)
 	}

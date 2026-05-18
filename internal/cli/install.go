@@ -58,7 +58,7 @@ func runInstall(ctx context.Context, errw io.Writer, g *GlobalFlags, args []stri
 	}
 
 	// 1. Load manifests
-	manifests, err := loadAllManifests(g)
+	manifests, err := LoadAllManifests(g)
 	if err != nil {
 		return wrapPreflight(err)
 	}
@@ -113,7 +113,7 @@ func runInstall(ctx context.Context, errw io.Writer, g *GlobalFlags, args []stri
 
 	// 8. Build sink
 	streamSink := event.StreamSink{W: os.Stderr}
-	logSink, logErr := event.NewLogFileSink(stateDir(home), 10)
+	logSink, logErr := event.NewLogFileSink(StateDir(home), 10)
 	var sink event.Sink
 	if logErr == nil {
 		defer logSink.Close()
@@ -167,7 +167,11 @@ func getCwd() string {
 	return d
 }
 
-func stateDir(home string) string {
+// StateDir returns the directory under which dot persists per-run log files.
+// Exported so the TUI launcher (internal/tui) can write log files to the same
+// location as the CLI install path. Falls back to ".dot-state" when HOME is
+// empty so the function never returns "".
+func StateDir(home string) string {
 	if home == "" {
 		return ".dot-state"
 	}

@@ -38,7 +38,7 @@ func NewStatusCmd(g *GlobalFlags) *cobra.Command {
 }
 
 func runStatus(ctx context.Context, out, errw io.Writer, g *GlobalFlags, args []string, f *statusFlags) error {
-	manifests, err := loadAllManifests(g)
+	manifests, err := LoadAllManifests(g)
 	if err != nil {
 		return wrapPreflight(err)
 	}

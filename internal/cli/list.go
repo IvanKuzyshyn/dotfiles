@@ -18,7 +18,7 @@ func NewListCmd(g *GlobalFlags) *cobra.Command {
 		Use:   "list",
 		Short: "List known tools (embedded + overlay manifests)",
 		RunE: func(c *cobra.Command, _ []string) error {
-			tools, err := loadAllManifests(g)
+			tools, err := LoadAllManifests(g)
 			if err != nil {
 				return err
 			}
@@ -45,9 +45,11 @@ func NewListCmd(g *GlobalFlags) *cobra.Command {
 	}
 }
 
-// loadAllManifests collects embedded manifests plus overlays from the
+// LoadAllManifests collects embedded manifests plus overlays from the
 // config directory and dotfiles directory (if either has a tools/ subdir).
-func loadAllManifests(g *GlobalFlags) ([]manifest.Tool, error) {
+// Exported so the TUI launcher (internal/tui) can share the CLI's manifest
+// resolution path.
+func LoadAllManifests(g *GlobalFlags) ([]manifest.Tool, error) {
 	embedded, err := manifest.LoadEmbedded()
 	if err != nil {
 		return nil, fmt.Errorf("load embedded: %w", err)
