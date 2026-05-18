@@ -103,10 +103,10 @@ dotfiles/
 - Create: `.golangci.yaml`
 - Modify: `.gitignore` (add `/bin/`, `/dist/`, `*.test`, `coverage.out`)
 
-- [ ] **Step 1: Initialize Go module**
+- [x] **Step 1: Initialize Go module**
   Run: `go mod init github.com/ivankuzyshyn/dotfiles`
 
-- [ ] **Step 2: Write Makefile**
+- [x] **Step 2: Write Makefile**
   ```make
   GO ?= go
   PKG := ./...
@@ -132,13 +132,13 @@ dotfiles/
   	rm -rf bin dist
   ```
 
-- [ ] **Step 3: Write `.golangci.yaml`**
+- [x] **Step 3: Write `.golangci.yaml`**
   Enable `govet`, `staticcheck`, `errcheck`, `ineffassign`, `unused`, `revive`, `gofumpt`, `goimports`, `gocyclo` (max 15), `funlen` (max 80 lines / 60 stmts), `gosec`, `errorlint`. Disable `gci`. Set `run.timeout: 5m`.
 
-- [ ] **Step 4: Update `.gitignore`**
+- [x] **Step 4: Update `.gitignore`**
   Append `/bin/`, `/dist/`, `*.test`, `coverage.out`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
   ```bash
   git add go.mod Makefile .golangci.yaml .gitignore
   git commit -m "Initialize Go module and tooling"
