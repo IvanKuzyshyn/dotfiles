@@ -1691,15 +1691,15 @@ dotfiles/
 
 - [x] **Step 2: Commit `Add release workflow`**
 
-### Task 58: macOS integration workflow
+### Task 58: macOS integration workflow ✓ done in commit `f42d081`
 
 **Files:**
 - Create: `.github/workflows/integration-macos.yml`
 
-- [ ] **Step 1: Write workflow**
+- [x] **Step 1: Write workflow**
   Triggers: `workflow_dispatch` + nightly cron. Job on `macos-latest`: setup-go, `make test-int`. Uploads logs as artifact on failure.
 
-- [ ] **Step 2: Commit `Add macOS integration workflow`**
+- [x] **Step 2: Commit `Add macOS integration workflow`**
 
 ### Task 59: Replace `install.sh` with curl bootstrap
 
