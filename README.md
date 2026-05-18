@@ -13,14 +13,16 @@ streams.
 
 ## Install
 
-A one-line curl bootstrap is planned but not yet released:
+One-line curl bootstrap (downloads the latest release tarball, verifies its
+SHA-256 checksum, and installs `dot` to `$HOME/.local/bin`):
 
 ```bash
-# Pending the first tagged release
 curl -fsSL https://github.com/ivankuzyshyn/dotfiles/releases/latest/download/install.sh | sh
 ```
 
-Until then, build from source:
+Set `PREFIX` to install elsewhere (e.g. `PREFIX=/usr/local/bin`).
+
+Alternatively, build from source:
 
 ```bash
 git clone git@github.com:ivankuzyshyn/dotfiles.git ~/dotfiles
@@ -28,9 +30,6 @@ cd ~/dotfiles
 make build
 ./bin/dot
 ```
-
-The repo-root `install.sh` is a stub pending replacement with the curl
-bootstrap in Phase 5.
 
 ## Usage
 
