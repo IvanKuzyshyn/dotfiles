@@ -3,7 +3,7 @@ PKG := ./...
 BIN := bin/dot
 VERSION ?= dev
 
-.PHONY: build test test-int lint fmt fmt-check tidy clean
+.PHONY: build test test-int test-snapshot snapshot lint fmt fmt-check tidy clean
 
 build:
 	$(GO) build -ldflags "-X main.version=$(VERSION)" -o $(BIN) ./cmd/dot
@@ -13,6 +13,12 @@ test:
 
 test-int:
 	$(GO) test -tags=integration $(PKG)
+
+test-snapshot:
+	$(GO) test -tags=teatest ./internal/tui/...
+
+snapshot:
+	$(GO) test -tags=teatest ./internal/tui/... -update
 
 lint:
 	golangci-lint run

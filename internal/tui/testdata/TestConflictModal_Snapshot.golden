@@ -1,0 +1,14 @@
+╭────────────────────────────────────────────────╮
+│                                                │
+│  Conflict at /x/y                              │
+│  Existing: file                                │
+│                                                │
+│    [ ] Backup                                  │
+│    [x] Overwrite                               │
+│    [ ] Skip                                    │
+│    [ ] Abort                                   │
+│                                                │
+│    [ ] Apply to remaining   (space to toggle)  │
+│                                                │
+│                                                │
+╰────────────────────────────────────────────────╯
