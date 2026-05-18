@@ -1414,19 +1414,19 @@ dotfiles/
 
 - [x] **Step 3: Commit `Wire TUI as default entry`**
 
-### Task 45: Phase 3 wrap-up
+### Task 45: Phase 3 wrap-up ✓ done in commit `240e31a`
 
 **Files:**
 - Modify: `internal/tui/testdata/` (snapshots)
 
-- [ ] **Step 1: Add `make snapshot` target**
+- [x] **Step 1: Add `make snapshot` target**
   ```make
   snapshot:
   	$(GO) test -tags=teatest -update ./internal/tui/...
   ```
-- [ ] **Step 2: Generate initial snapshots**
+- [x] **Step 2: Generate initial snapshots**
   Run: `make snapshot`
-- [ ] **Step 3: Commit `Add TUI snapshot baseline`**
+- [x] **Step 3: Commit `Add TUI snapshot baseline`**
 
 **Phase 3 complete.** Manual TUI walkthrough with the example tool. Force a conflict scenario by hand-editing a config target; resolve via modal.
 
