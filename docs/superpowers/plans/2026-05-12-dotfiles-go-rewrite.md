@@ -1368,13 +1368,13 @@ dotfiles/
 
 - [x] **Step 3: Commit `Add conflict modal`**
 
-### Task 43: TUISink
+### Task 43: TUISink ✓ done in commit `c355ec2`
 
 **Files:**
 - Create: `internal/tui/sink.go`
 - Create: `internal/tui/sink_test.go`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   ```go
   type Sink struct{ prog *tea.Program; resolvers sync.Map /* targetPath → chan event.ConflictAction */ }
   func (s *Sink) Send(e event.Event) {
@@ -1389,10 +1389,10 @@ dotfiles/
   ```
   App forwards user's modal choice via `s.Resolve`.
 
-- [ ] **Step 2: Test**
+- [x] **Step 2: Test**
   Use teatest with a stubbed program; send fake event; assert the RunEventMsg lands.
 
-- [ ] **Step 3: Commit `Add TUISink event bridge`**
+- [x] **Step 3: Commit `Add TUISink event bridge`**
 
 ### Task 44: TUI default entry, runner-in-goroutine
 
