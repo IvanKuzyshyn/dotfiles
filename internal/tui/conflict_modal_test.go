@@ -3,14 +3,10 @@ package tui
 import (
 	"strings"
 	"testing"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/x/exp/teatest"
 
 	"github.com/ivankuzyshyn/dotfiles/internal/event"
-	"github.com/ivankuzyshyn/dotfiles/internal/step"
-	"github.com/ivankuzyshyn/dotfiles/internal/tool"
 )
 
 func mkConflict() event.Conflict {
@@ -176,24 +172,18 @@ func TestConflictModal_ViewContainsTargetAndChoices(t *testing.T) {
 	}
 }
 
-// TestConflictModal_TeatestSpecScenario sends ConflictPrompt via a hand-built
-// App harness, then ↓ ↓ enter; asserts the third choice (Skip) is emitted.
-// Task 44 will wire this end-to-end through the real App.Update; for now we
-// drive the modal directly through teatest by embedding it in a minimal model
-// that mirrors App's overlay routing.
-func TestConflictModal_TeatestSpecScenario(t *testing.T) {
-	reg, err := tool.NewRegistry(nil)
-	if err != nil {
-		t.Fatalf("NewRegistry: %v", err)
+func TestConflictModal_EnterWithApplyAll(t *testing.T) {
+	m := NewConflictModal(mkConflict())
+	m, _ = m.Update(tea.KeyMsg{Type: tea.KeySpace})
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil {
+		t.Fatal("enter returned nil cmd")
 	}
-	app := NewApp(reg, step.Env{})
-	modal := NewConflictModal(mkConflict())
-	app.modal = &modal
-
-	tm := teatest.NewTestModel(t, app, teatest.WithInitialTermSize(80, 24))
-	tm.Send(tea.KeyMsg{Type: tea.KeyDown})
-	tm.Send(tea.KeyMsg{Type: tea.KeyDown})
-	tm.Send(tea.KeyMsg{Type: tea.KeyEnter})
-	tm.Send(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}})
-	tm.WaitFinished(t, teatest.WithFinalTimeout(2*time.Second))
+	msg, ok := cmd().(ConflictResolutionMsg)
+	if !ok {
+		t.Fatalf("expected ConflictResolutionMsg, got %T", cmd())
+	}
+	if !msg.ApplyAll {
+		t.Errorf("ApplyAll = false, want true")
+	}
 }
