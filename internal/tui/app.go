@@ -124,20 +124,11 @@ var headerStyle = lipgloss.NewStyle().Bold(true)
 
 // --- Placeholder sub-models ---------------------------------------------
 //
-// The real RunnerPane and ConflictModal types arrive in Tasks 41 and 42.
-// These stubs exist only so the App compiles and the shell's routing can
-// be tested in isolation. Each stub mirrors the Bubble Tea Update/View
-// shape but returns its own concrete type so the App can store updated
-// values without type assertions.
-
-// RunnerPane is replaced by a real split-pane view in Task 41.
-type RunnerPane struct{}
-
-// Update is a no-op pending the real implementation.
-func (r RunnerPane) Update(_ tea.Msg) (RunnerPane, tea.Cmd) { return r, nil }
-
-// View returns a placeholder string.
-func (r RunnerPane) View() string { return "runner placeholder" }
+// The real ConflictModal type arrives in Task 42. RunnerPane is now defined
+// in runner_pane.go. The stub below exists only so the App compiles and the
+// shell's routing can be tested in isolation. It mirrors the Bubble Tea
+// Update/View shape but returns its own concrete type so the App can store
+// updated values without type assertions.
 
 // ConflictModal is replaced by a real overlay in Task 42.
 type ConflictModal struct{}
