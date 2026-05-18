@@ -56,6 +56,7 @@ type RunnerPane struct {
 	spinner     spinner.Model
 	viewport    viewport.Model
 	fullLogOpen bool
+	tickStarted bool
 }
 
 // NewRunnerPane initializes a pane for the given tools list. Status starts at
@@ -84,8 +85,8 @@ func NewRunnerPane(tools []*tool.Tool) RunnerPane {
 func (r RunnerPane) Update(msg tea.Msg) (RunnerPane, tea.Cmd) {
 	switch m := msg.(type) {
 	case RunEventMsg:
-		r.applyEvent(m.Event)
-		return r, nil
+		cmd := r.applyEvent(m.Event)
+		return r, cmd
 
 	case tea.WindowSizeMsg:
 		r.width = m.Width
@@ -127,8 +128,12 @@ func (r RunnerPane) Update(msg tea.Msg) (RunnerPane, tea.Cmd) {
 			}
 			return r, nil
 		case "esc":
-			r.fullLogOpen = false
-			return r, nil
+			// Only consume esc when the full-log viewport is open; otherwise
+			// fall through so the app-level handler (Task 44) can route it.
+			if r.fullLogOpen {
+				r.fullLogOpen = false
+				return r, nil
+			}
 		case "r":
 			if r.onSummary && r.focusedStatus() == StatusFailed {
 				t := r.tools[r.focused]
@@ -171,14 +176,22 @@ func (r RunnerPane) View() string {
 }
 
 // applyEvent mutates pane state from a single runner event. Step events
-// also push a synthetic log line so users see step boundaries inline.
-func (r *RunnerPane) applyEvent(e event.Event) {
+// also push a synthetic log line so users see step boundaries inline. The
+// returned tea.Cmd is non-nil only on the first transition into Running, to
+// kick off the spinner tick; subsequent ticks are propagated by the spinner
+// itself via spinner.TickMsg handling in Update.
+func (r *RunnerPane) applyEvent(e event.Event) tea.Cmd {
 	if e.Tool == "" {
-		return
+		return nil
 	}
+	var cmd tea.Cmd
 	switch e.Kind {
 	case event.ToolStarted:
 		r.status[e.Tool] = StatusRunning
+		if !r.tickStarted {
+			r.tickStarted = true
+			cmd = r.spinner.Tick
+		}
 	case event.ToolFinished:
 		r.status[e.Tool] = StatusSucceeded
 	case event.ToolFailed:
@@ -203,6 +216,7 @@ func (r *RunnerPane) applyEvent(e event.Event) {
 		// Modal handles conflicts; nothing to do here.
 	}
 	r.refreshSummaryFlag()
+	return cmd
 }
 
 // refreshSummaryFlag flips onSummary to true when every tool has reached a
@@ -309,9 +323,9 @@ func (r RunnerPane) renderFocusedLog() string {
 	// Cap visible lines to the available height so we don't blow past the
 	// terminal. height-2 accounts for the App's header.
 	if r.height > 2 {
-		cap := r.height - 2
-		if len(lines) > cap {
-			lines = lines[len(lines)-cap:]
+		visibleLines := r.height - 2
+		if len(lines) > visibleLines {
+			lines = lines[len(lines)-visibleLines:]
 		}
 	}
 	content := strings.Join(lines, "\n")
@@ -345,40 +359,40 @@ func (r RunnerPane) rightWidth() int {
 var runnerFocusedRowStyle = lipgloss.NewStyle().Bold(true)
 
 // ringBuffer is a fixed-capacity FIFO of strings used for per-tool log
-// retention. Push wraps once cap is reached; Lines returns entries in
+// retention. Push wraps once capacity is reached; Lines returns entries in
 // insertion order, oldest first.
 type ringBuffer struct {
-	buf  []string
-	head int // index of the oldest entry (when size == cap)
-	size int
-	cap  int
+	buf      []string
+	head     int // index of the oldest entry (when size == capacity)
+	size     int
+	capacity int
 }
 
-func newRingBuffer(cap int) *ringBuffer {
-	if cap <= 0 {
-		cap = 1
+func newRingBuffer(capacity int) *ringBuffer {
+	if capacity <= 0 {
+		capacity = 1
 	}
-	return &ringBuffer{cap: cap, buf: make([]string, 0, cap)}
+	return &ringBuffer{capacity: capacity, buf: make([]string, 0, capacity)}
 }
 
 func (r *ringBuffer) Push(line string) {
-	if r.size < r.cap {
+	if r.size < r.capacity {
 		r.buf = append(r.buf, line)
 		r.size++
 		return
 	}
 	r.buf[r.head] = line
-	r.head = (r.head + 1) % r.cap
+	r.head = (r.head + 1) % r.capacity
 }
 
 func (r *ringBuffer) Lines() []string {
 	out := make([]string, 0, r.size)
-	if r.size < r.cap {
+	if r.size < r.capacity {
 		out = append(out, r.buf...)
 		return out
 	}
 	for i := 0; i < r.size; i++ {
-		out = append(out, r.buf[(r.head+i)%r.cap])
+		out = append(out, r.buf[(r.head+i)%r.capacity])
 	}
 	return out
 }

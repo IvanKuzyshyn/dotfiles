@@ -227,3 +227,66 @@ func TestRunnerPane_SpecScenarioViewContainsState(t *testing.T) {
 		t.Errorf("View should contain last log line 'all done', got:\n%s", view)
 	}
 }
+
+// TestRunnerPane_SpinnerTickEmittedOnFirstRunning asserts the first transition
+// into Running returns a non-nil tea.Cmd so the spinner animation can start.
+func TestRunnerPane_SpinnerTickEmittedOnFirstRunning(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	_, cmd := r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolStarted, Tool: "alpha"}})
+	if cmd == nil {
+		t.Fatal("first ToolStarted should return a non-nil cmd to kick off the spinner")
+	}
+}
+
+// TestRunnerPane_SpinnerTickEmittedOnlyOnce asserts subsequent ToolStarted
+// events do not re-emit a fresh tick (the spinner's own TickMsg loop keeps
+// the animation going).
+func TestRunnerPane_SpinnerTickEmittedOnlyOnce(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	r, cmd := r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolStarted, Tool: "alpha"}})
+	if cmd == nil {
+		t.Fatal("precondition: first ToolStarted should emit a tick cmd")
+	}
+	_, cmd = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolStarted, Tool: "beta"}})
+	if cmd != nil {
+		t.Fatal("second ToolStarted should not emit another tick cmd")
+	}
+}
+
+// TestRunnerPane_EscFallsThroughWhenFullLogClosed asserts esc with no full log
+// open is a no-op (no cmd, no state mutation) so the app-level handler can
+// own the key in Task 44.
+func TestRunnerPane_EscFallsThroughWhenFullLogClosed(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	if r.fullLogOpen {
+		t.Fatal("precondition: fullLogOpen should be false on a fresh pane")
+	}
+	beforeFocus := r.focused
+	updated, cmd := r.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	if cmd != nil {
+		t.Errorf("esc with no full log open should not emit a cmd, got %v", cmd)
+	}
+	if updated.fullLogOpen {
+		t.Error("esc should not mutate fullLogOpen when it is already false")
+	}
+	if updated.focused != beforeFocus {
+		t.Errorf("esc should not mutate focus, got %d want %d", updated.focused, beforeFocus)
+	}
+}
+
+// TestRunnerPane_EscClosesFullLog asserts that when the full-log viewport is
+// open, esc closes it.
+func TestRunnerPane_EscClosesFullLog(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	// Bring alpha to a terminal state so 'l' is permitted to open the log.
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.LogLine, Tool: "alpha", Line: "hi"}})
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolFinished, Tool: "alpha"}})
+	r, _ = r.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'l'}})
+	if !r.fullLogOpen {
+		t.Fatal("precondition: 'l' should have opened the full log")
+	}
+	r, _ = r.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	if r.fullLogOpen {
+		t.Error("esc should close the full log viewport")
+	}
+}
