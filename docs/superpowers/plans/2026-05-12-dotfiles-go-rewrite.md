@@ -12,7 +12,7 @@
 
 **Branch:** Continue on `new-architecture-planning`. Commit after each task; PR when Phase 4 cutover completes.
 
-**Progress (as of commit `276739b`):** Tasks 1–11 complete. Foundation + manifest layer in place: Go module + Makefile + CI; `internal/platform`; `internal/exec` (real + fake); `internal/fs` (real + fake); `internal/event` (types, StreamSink, LogFileSink, Tee); `internal/manifest` (schema, loader with embed + overlay merge, validator with cycle detection); `toolsfs` package at module root (embed workaround). All tests pass (`go test ./...`). Next up: Task 12 (Step interface and Env).
+**Progress (as of commit `f39988e`):** **Phase 1 complete (Tasks 1–23).** Foundation, manifest, step, tool, runner, and CLI layers are in place. `dot list` enumerates known tools; `dot install <name>` runs shell-typed steps with fault tolerance; `dot version` prints the build version. Per-run log files written to `~/.local/state/dot/runs/`. Smoke test (`tools/example.yaml`) passes end-to-end. `go test ./...` green across 9 packages. **Next up: Phase 2, Task 24 (`homebrew_bootstrap` step).**
 
 ---
 
