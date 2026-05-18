@@ -1,0 +1,7 @@
+name: git
+description: Git with shared config + global gitignore
+platforms: [darwin, linux]
+depends_on: [homebrew]
+configs:
+  - source: git
+    target: ~
