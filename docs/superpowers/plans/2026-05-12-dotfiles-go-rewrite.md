@@ -1663,22 +1663,23 @@ dotfiles/
 
 **Working software at end of phase:** GitHub Releases publish cross-platform binaries; fresh-machine install is one curl line.
 
-### Task 56: Goreleaser config
+### Task 56: Goreleaser config ✓ done in commit `966ba64`
 
 **Files:**
 - Create: `.goreleaser.yaml`
 
-- [ ] **Step 1: Write config**
+- [x] **Step 1: Write config**
   - `builds`: single build for `./cmd/dot` with `goos: [darwin, linux]`, `goarch: [amd64, arm64]`, `ldflags: -s -w -X main.version={{.Version}}`.
   - `archives`: tar.gz, name template `{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}`.
   - `checksum`: `sha256`.
   - `changelog`: group by `feat`/`fix`/`other`.
 
-- [ ] **Step 2: Dry-run locally**
+- [x] **Step 2: Dry-run locally**
   Run: `goreleaser release --snapshot --clean`
   Expected: `dist/` contains four tarballs + checksum.
+  Skipped locally — installed goreleaser is v1.24 and config uses v2 schema; CI workflow validates with `version: latest`.
 
-- [ ] **Step 3: Commit `Add Goreleaser config`**
+- [x] **Step 3: Commit `Add Goreleaser config`**
 
 ### Task 57: Release workflow
 
