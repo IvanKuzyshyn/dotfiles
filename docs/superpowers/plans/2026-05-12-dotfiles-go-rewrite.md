@@ -12,7 +12,7 @@
 
 **Branch:** Continue on `new-architecture-planning`. Commit after each task; PR when Phase 4 cutover completes.
 
-**Progress (as of commit `fe14141`):** Tasks 1–9 complete. Foundation layer in place: Go module + Makefile + CI, `internal/platform`, `internal/exec` (real + fake), `internal/fs` (real + fake), `internal/event` (types, StreamSink, LogFileSink, Tee), `internal/manifest` (schema types). All tests pass. Next up: Task 10 (manifest loader with embed and overlay merge).
+**Progress (as of commit `276739b`):** Tasks 1–11 complete. Foundation + manifest layer in place: Go module + Makefile + CI; `internal/platform`; `internal/exec` (real + fake); `internal/fs` (real + fake); `internal/event` (types, StreamSink, LogFileSink, Tee); `internal/manifest` (schema, loader with embed + overlay merge, validator with cycle detection); `toolsfs` package at module root (embed workaround). All tests pass (`go test ./...`). Next up: Task 12 (Step interface and Env).
 
 ---
 
@@ -497,7 +497,7 @@ dotfiles/
   git commit -m "Add manifest schema types"
   ```
 
-### Task 10: Manifest loader (file/dir/embedded, overlay merge, platform filter)
+### Task 10: Manifest loader (file/dir/embedded, overlay merge, platform filter) ✓ done in commit `a6eaa96` (note: `//go:embed` rejected `..` patterns, so an extra `toolsfs.go` lives at the module root)
 
 **Files:**
 - Create: `internal/manifest/loader.go`
@@ -530,7 +530,7 @@ dotfiles/
   git commit -m "Add manifest loader with embed and overlay merge"
   ```
 
-### Task 11: Manifest validator (schema + dep cycle)
+### Task 11: Manifest validator ✓ done in commit `276739b` (schema + dep cycle)
 
 **Files:**
 - Create: `internal/manifest/validate.go`
