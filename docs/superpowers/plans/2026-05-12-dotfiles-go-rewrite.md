@@ -1319,21 +1319,21 @@ dotfiles/
 
 - [x] **Step 4: Commit `Add TUI app shell`**
 
-### Task 40: Picker screen
+### Task 40: Picker screen ✓ done in commit `a6857a2`
 
 **Files:**
 - Create: `internal/tui/picker.go`
 - Create: `internal/tui/picker_test.go`
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   - Wraps Bubbles `list.Model`. Items are tools with checkbox display.
   - Keys: `space` toggle selection, `a` select all, `t` cycle tag filter, `/` filter by substring, `enter` emit `StartRunMsg{[]*tool.Tool}`.
   - Lipgloss-styled rendering: highlighted, selected, hidden by filter.
 
-- [ ] **Step 2: teatest snapshots**
+- [x] **Step 2: teatest snapshots**
   Send keys: down, space, down, space, enter. Assert emitted `StartRunMsg` lists the two selected tools.
 
-- [ ] **Step 3: Commit `Add picker screen`**
+- [x] **Step 3: Commit `Add picker screen`**
 
 ### Task 41: Runner pane (split status + logs)
 
