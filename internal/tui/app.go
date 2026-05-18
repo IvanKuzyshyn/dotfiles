@@ -41,7 +41,7 @@ type App struct {
 func NewApp(reg *tool.Registry, env step.Env) App {
 	return App{
 		screen: screenPicker,
-		picker: Picker{},
+		picker: NewPicker(reg.All()),
 		runner: RunnerPane{},
 		reg:    reg,
 		env:    env,
@@ -124,20 +124,11 @@ var headerStyle = lipgloss.NewStyle().Bold(true)
 
 // --- Placeholder sub-models ---------------------------------------------
 //
-// The real Picker, RunnerPane, and ConflictModal types arrive in Tasks 40,
-// 41, and 42. These stubs exist only so the App compiles and the shell's
-// routing can be tested in isolation. Each stub mirrors the Bubble Tea
-// Update/View shape but returns its own concrete type so the App can store
-// updated values without type assertions.
-
-// Picker is replaced by a real bubbles/list-based picker in Task 40.
-type Picker struct{}
-
-// Update is a no-op pending the real implementation.
-func (p Picker) Update(_ tea.Msg) (Picker, tea.Cmd) { return p, nil }
-
-// View returns a placeholder string.
-func (p Picker) View() string { return "picker placeholder" }
+// The real RunnerPane and ConflictModal types arrive in Tasks 41 and 42.
+// These stubs exist only so the App compiles and the shell's routing can
+// be tested in isolation. Each stub mirrors the Bubble Tea Update/View
+// shape but returns its own concrete type so the App can store updated
+// values without type assertions.
 
 // RunnerPane is replaced by a real split-pane view in Task 41.
 type RunnerPane struct{}
