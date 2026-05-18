@@ -138,6 +138,67 @@ func TestPicker_EnterWithEmptySelectionIsNoop(t *testing.T) {
 	}
 }
 
+// TestPicker_KeysIgnoredWhileFiltering verifies that once the user has
+// activated `/` filter mode, picker action keys (space/a/t/enter) are
+// forwarded to the list's filter input rather than triggering selection,
+// select-all, tag cycling, or run start.
+func TestPicker_KeysIgnoredWhileFiltering(t *testing.T) {
+	p := NewPicker(mkTools())
+
+	// Enter filter mode.
+	p, _ = p.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'/'}})
+
+	// Space must not toggle the highlighted item's selection.
+	p, _ = p.Update(tea.KeyMsg{Type: tea.KeySpace})
+	if _, on := p.selected["alpha"]; on {
+		t.Fatal("space should not toggle selection while filter input is focused")
+	}
+
+	// `a` must not select all.
+	p, _ = p.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}})
+	if len(p.selected) != 0 {
+		t.Fatalf("a should not select all while filtering, got %d selected", len(p.selected))
+	}
+
+	// `t` must not cycle the tag filter.
+	p, _ = p.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'t'}})
+	if p.tagFilter != "" {
+		t.Fatalf("t should not cycle tags while filtering, got tagFilter=%q", p.tagFilter)
+	}
+
+	// Enter must not emit a StartRunMsg — even with a selection it would be
+	// the filter input's "apply filter" action, not picker's "run".
+	_, cmd := p.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		if msg := cmd(); msg != nil {
+			if _, ok := msg.(StartRunMsg); ok {
+				t.Fatal("enter should not emit StartRunMsg while filter input is focused")
+			}
+		}
+	}
+}
+
+// TestPicker_CycleTagNoopWithoutTags verifies that pressing `t` is a safe
+// no-op when none of the tools carry any tags.
+func TestPicker_CycleTagNoopWithoutTags(t *testing.T) {
+	tools := []*tool.Tool{
+		{Name: "alpha", Description: "first"},
+		{Name: "beta", Description: "second"},
+	}
+	p := NewPicker(tools)
+	if len(p.tags) != 0 {
+		t.Fatalf("precondition: expected no tags, got %v", p.tags)
+	}
+
+	p, cmd := p.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'t'}})
+	if p.tagFilter != "" {
+		t.Errorf("tagFilter changed to %q with no tags configured", p.tagFilter)
+	}
+	if cmd != nil {
+		t.Errorf("cycleTag should return nil Cmd when there are no tags")
+	}
+}
+
 // TestPicker_TeatestSequence runs the spec's key sequence through teatest to
 // confirm the picker drives the full Bubble Tea loop without panicking and
 // reaches the expected selection state.

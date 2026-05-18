@@ -99,8 +99,7 @@ func (p Picker) Update(msg tea.Msg) (Picker, tea.Cmd) {
 			p.toggleAllVisible()
 			return p, nil
 		case "t":
-			p.cycleTag()
-			return p, nil
+			return p, p.cycleTag()
 		case "enter":
 			if len(p.selected) == 0 {
 				return p, nil
@@ -172,10 +171,12 @@ func (p *Picker) toggleAllVisible() {
 }
 
 // cycleTag advances tagFilter to the next tag in p.tags, wrapping back to
-// "" (all tags) after the last one. Re-populates list items to match.
-func (p *Picker) cycleTag() {
+// "" (all tags) after the last one. Re-populates list items to match. The
+// returned Cmd carries the re-filter command from list.SetItems, which is
+// non-nil while the bubbles list is in FilterApplied state.
+func (p *Picker) cycleTag() tea.Cmd {
 	if len(p.tags) == 0 {
-		return
+		return nil
 	}
 	// States are "" then each tag in order, length = len(tags)+1.
 	cur := -1
@@ -191,7 +192,7 @@ func (p *Picker) cycleTag() {
 	} else {
 		p.tagFilter = p.tags[next]
 	}
-	p.list.SetItems(p.filteredItems())
+	return p.list.SetItems(p.filteredItems())
 }
 
 // filteredItems returns the canonical tool slice filtered by tagFilter.
