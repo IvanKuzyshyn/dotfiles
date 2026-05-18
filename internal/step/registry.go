@@ -55,6 +55,14 @@ func RegisteredTypes() []string {
 	return out
 }
 
+// isRegistered reports whether typeName has a Constructor.
+func isRegistered(typeName string) bool {
+	regMu.RLock()
+	_, ok := reg[typeName]
+	regMu.RUnlock()
+	return ok
+}
+
 // resetRegistryForTest clears the registry. Tests use this to isolate from
 // real init() registrations.
 func resetRegistryForTest() {
