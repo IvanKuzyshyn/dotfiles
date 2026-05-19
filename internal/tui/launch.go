@@ -123,9 +123,19 @@ func (l launchApp) Init() tea.Cmd { return l.inner.Init() }
 func (l launchApp) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m := msg.(type) {
 	case StartRunMsg:
-		l.inner.runner = NewRunnerPane(m.Tools)
+		// Expand transitive dependencies so picking `claude` also runs the
+		// `claude-code` and `nvm` it relies on, matching `dot install` CLI
+		// behavior. If the registry can't satisfy a dep we fall back to the
+		// user's literal selection rather than failing silently.
+		tools := m.Tools
+		if l.inner.reg != nil {
+			if expanded, err := tool.ExpandDeps(l.inner.reg, m.Tools, false); err == nil {
+				tools = tool.Sort(expanded)
+			}
+		}
+		l.inner.runner = NewRunnerPane(tools)
 		l.inner.screen = screenRunner
-		return l, l.startRun(m.Tools)
+		return l, l.startRun(tools)
 
 	case RunEventMsg:
 		// Open the conflict modal when the runner asks for a decision.
@@ -171,11 +181,12 @@ func (l launchApp) View() string { return l.inner.View() }
 
 // startRun returns a tea.Cmd that, when scheduled by the Tea runtime in its
 // goroutine pool, runs the plan to completion and yields RunCompletedMsg. The
-// sink forwards individual events back to the program while the run is in
-// flight, so the runner pane updates live.
+// caller is responsible for any dep-expansion / sort; this function just
+// hands the slice to the runner. The sink forwards individual events back to
+// the program while the run is in flight, so the runner pane updates live.
 func (l launchApp) startRun(tools []*tool.Tool) tea.Cmd {
 	return func() tea.Msg {
-		plan := runner.Plan{Tools: tool.Sort(tools)}
+		plan := runner.Plan{Tools: tools}
 		var sink event.Sink = l.sink
 		if l.logSink != nil {
 			sink = event.Tee(l.sink, l.logSink)

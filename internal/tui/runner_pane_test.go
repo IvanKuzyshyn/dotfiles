@@ -290,3 +290,60 @@ func TestRunnerPane_EscClosesFullLog(t *testing.T) {
 		t.Error("esc should close the full log viewport")
 	}
 }
+
+func TestRunnerPane_FocusAutoFollowsRunningTool(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	if r.focused != 0 {
+		t.Fatalf("initial focus=%d, want 0", r.focused)
+	}
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolStarted, Tool: "beta"}})
+	if r.focused != 1 {
+		t.Errorf("focus after ToolStarted beta=%d, want 1", r.focused)
+	}
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolStarted, Tool: "gamma"}})
+	if r.focused != 2 {
+		t.Errorf("focus after ToolStarted gamma=%d, want 2", r.focused)
+	}
+}
+
+func TestRunnerPane_ManualTabStopsAutoFollow(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	r, _ = r.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if r.focused != 1 {
+		t.Fatalf("focus after tab=%d, want 1", r.focused)
+	}
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolStarted, Tool: "gamma"}})
+	if r.focused != 1 {
+		t.Errorf("focus after manual+ToolStarted gamma=%d, want 1 (manual override)", r.focused)
+	}
+}
+
+func TestRunnerPane_SummaryBannerWhenComplete(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	r, _ = r.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolFinished, Tool: "alpha"}})
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolFailed, Tool: "beta", Err: errors.New("nope")}})
+	r, _ = r.Update(RunEventMsg{Event: event.Event{Kind: event.ToolSkipped, Tool: "gamma"}})
+	if !r.onSummary {
+		t.Fatal("expected onSummary=true")
+	}
+	view := r.View()
+	if !strings.Contains(view, "1 succeeded") {
+		t.Errorf("View missing '1 succeeded': %q", view)
+	}
+	if !strings.Contains(view, "1 failed") {
+		t.Errorf("View missing '1 failed': %q", view)
+	}
+	if !strings.Contains(view, "1 skipped") {
+		t.Errorf("View missing '1 skipped': %q", view)
+	}
+}
+
+func TestRunnerPane_HelpFooterPresentInView(t *testing.T) {
+	r := NewRunnerPane(mkRunnerTools())
+	r, _ = r.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	view := r.View()
+	if !strings.Contains(view, "q") {
+		t.Errorf("View missing 'q' help hint: %q", view)
+	}
+}

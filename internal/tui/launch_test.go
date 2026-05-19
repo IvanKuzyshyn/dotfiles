@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/ivankuzyshyn/dotfiles/internal/event"
+	"github.com/ivankuzyshyn/dotfiles/internal/manifest"
 	"github.com/ivankuzyshyn/dotfiles/internal/step"
 	"github.com/ivankuzyshyn/dotfiles/internal/tool"
 )
@@ -14,7 +15,14 @@ import (
 // tests can assert on forwarded messages without spinning up Bubble Tea.
 func newTestLaunchApp(t *testing.T) (launchApp, *fakeProg) {
 	t.Helper()
-	reg, err := tool.NewRegistry(nil)
+	return newTestLaunchAppWithRegistry(t, nil)
+}
+
+// newTestLaunchAppWithRegistry is the same as newTestLaunchApp but lets the
+// caller seed manifests so dependency expansion can be exercised.
+func newTestLaunchAppWithRegistry(t *testing.T, manifests []manifest.Tool) (launchApp, *fakeProg) {
+	t.Helper()
+	reg, err := tool.NewRegistry(manifests)
 	if err != nil {
 		t.Fatalf("NewRegistry: %v", err)
 	}
@@ -156,5 +164,38 @@ func TestLaunchApp_ForwardsUnhandledMsgsToInner(t *testing.T) {
 	}
 	if got := cmd(); got != (tea.QuitMsg{}) {
 		t.Errorf("expected tea.QuitMsg, got %T", got)
+	}
+}
+
+// TestLaunchApp_StartRunExpandsDependencies ensures the TUI run respects
+// depends_on like the CLI does. Picking only `claude` should also drag in
+// `claude-code` and `nvm` so the user doesn't have to know the chain.
+func TestLaunchApp_StartRunExpandsDependencies(t *testing.T) {
+	manifests := []manifest.Tool{
+		{Name: "nvm", Configs: []manifest.Config{{Source: "nvm", Target: "~"}}},
+		{Name: "claude-code", DependsOn: []string{"nvm"}, Configs: []manifest.Config{{Source: "cc", Target: "~"}}},
+		{Name: "claude", DependsOn: []string{"claude-code"}, Configs: []manifest.Config{{Source: "claude", Target: "~"}}},
+	}
+	la, _ := newTestLaunchAppWithRegistry(t, manifests)
+	claude, ok := la.inner.reg.Get("claude")
+	if !ok {
+		t.Fatalf("registry missing claude")
+	}
+
+	got, _ := la.Update(StartRunMsg{Tools: []*tool.Tool{claude}})
+
+	gotLA := got.(launchApp)
+	names := make([]string, 0, len(gotLA.inner.runner.tools))
+	for _, t := range gotLA.inner.runner.tools {
+		names = append(names, t.Name)
+	}
+	want := map[string]bool{"claude": true, "claude-code": true, "nvm": true}
+	if len(names) != len(want) {
+		t.Fatalf("runner.tools = %v, want all three (claude + deps)", names)
+	}
+	for _, n := range names {
+		if !want[n] {
+			t.Errorf("unexpected tool %q in expanded run", n)
+		}
 	}
 }

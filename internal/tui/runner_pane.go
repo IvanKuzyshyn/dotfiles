@@ -51,6 +51,12 @@ type RunnerPane struct {
 	focused   int
 	onSummary bool
 
+	// userFocused flips true once the user presses Tab. Until then the
+	// focused tool auto-follows whichever tool last emitted ToolStarted, so
+	// the user sees the active tool's log without having to chase it
+	// manually.
+	userFocused bool
+
 	width, height int
 
 	spinner     spinner.Model
@@ -110,6 +116,7 @@ func (r RunnerPane) Update(msg tea.Msg) (RunnerPane, tea.Cmd) {
 		}
 		switch m.String() {
 		case "tab":
+			r.userFocused = true
 			r.focused = (r.focused + 1) % len(r.tools)
 			if r.fullLogOpen {
 				r.viewport.SetContent(r.focusedLogString())
@@ -157,22 +164,69 @@ func (r RunnerPane) Update(msg tea.Msg) (RunnerPane, tea.Cmd) {
 
 // View renders the split pane (or the full-log viewport, when open). For a
 // zero-value pane (no run yet) it returns an empty string so the App can
-// safely call View on every screen.
+// safely call View on every screen. When the run is complete a summary
+// banner appears above the pane; a help footer is always rendered below.
 func (r RunnerPane) View() string {
 	if len(r.tools) == 0 {
 		return ""
 	}
+	var body string
 	if r.fullLogOpen {
-		return r.viewport.View()
+		body = r.viewport.View()
+	} else {
+		left := r.renderToolList()
+		right := r.renderFocusedLog()
+		// Fall back to a vertical stack when the terminal is too narrow for a
+		// useful side-by-side layout.
+		if r.width > 0 && r.width < 50 {
+			body = left + "\n" + right
+		} else {
+			body = lipgloss.JoinHorizontal(lipgloss.Top, left, right)
+		}
 	}
-	left := r.renderToolList()
-	right := r.renderFocusedLog()
-	// Fall back to a vertical stack when the terminal is too narrow for a
-	// useful side-by-side layout.
-	if r.width > 0 && r.width < 50 {
-		return left + "\n" + right
+	var b strings.Builder
+	if r.onSummary {
+		b.WriteString(r.summaryBanner())
+		b.WriteByte('\n')
 	}
-	return lipgloss.JoinHorizontal(lipgloss.Top, left, right)
+	b.WriteString(body)
+	b.WriteByte('\n')
+	b.WriteString(r.helpFooter())
+	return b.String()
+}
+
+// summaryBanner renders the end-of-run line showing tally + retry hint. Only
+// invoked when r.onSummary is true.
+func (r RunnerPane) summaryBanner() string {
+	var s, f, sk int
+	for _, st := range r.status {
+		switch st {
+		case StatusSucceeded:
+			s++
+		case StatusFailed:
+			f++
+		case StatusSkipped:
+			sk++
+		}
+	}
+	msg := fmt.Sprintf("Run complete: %d succeeded · %d failed · %d skipped", s, f, sk)
+	return runnerSummaryStyle.Render(msg)
+}
+
+// helpFooter renders a one-line key-hint footer. The available actions depend
+// on whether the run is over and whether anything failed.
+func (r RunnerPane) helpFooter() string {
+	hints := []string{"tab focus", "l logs"}
+	if r.onSummary {
+		for _, st := range r.status {
+			if st == StatusFailed {
+				hints = append(hints, "r retry")
+				break
+			}
+		}
+	}
+	hints = append(hints, "q quit")
+	return runnerHelpStyle.Render(strings.Join(hints, " · "))
 }
 
 // applyEvent mutates pane state from a single runner event. Step events
@@ -188,6 +242,14 @@ func (r *RunnerPane) applyEvent(e event.Event) tea.Cmd {
 	switch e.Kind {
 	case event.ToolStarted:
 		r.status[e.Tool] = StatusRunning
+		if !r.userFocused {
+			for i, t := range r.tools {
+				if t.Name == e.Tool {
+					r.focused = i
+					break
+				}
+			}
+		}
 		if !r.tickStarted {
 			r.tickStarted = true
 			cmd = r.spinner.Tick
@@ -356,7 +418,11 @@ func (r RunnerPane) rightWidth() int {
 	return max(0, r.width-r.leftWidth())
 }
 
-var runnerFocusedRowStyle = lipgloss.NewStyle().Bold(true)
+var (
+	runnerFocusedRowStyle = lipgloss.NewStyle().Bold(true)
+	runnerSummaryStyle    = lipgloss.NewStyle().Bold(true)
+	runnerHelpStyle       = lipgloss.NewStyle().Faint(true)
+)
 
 // ringBuffer is a fixed-capacity FIFO of strings used for per-tool log
 // retention. Push wraps once capacity is reached; Lines returns entries in

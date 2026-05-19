@@ -1,4 +1,5 @@
-> ✓ alpha               alpha line 1                                            
-  ⣾  beta                                                                       
+  ✓ alpha               beta line 1                                             
+> ⣾  beta                                                                       
   · gamma                                                                       
                                                                                 
+tab focus · l logs · q quit
