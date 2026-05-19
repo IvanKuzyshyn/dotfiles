@@ -1,0 +1,7 @@
+name: zsh
+description: Zsh configuration
+platforms: [darwin, linux]
+depends_on: [oh-my-zsh]
+configs:
+  - source: zsh
+    target: ~

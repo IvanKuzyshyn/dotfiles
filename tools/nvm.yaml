@@ -1,0 +1,17 @@
+name: nvm
+description: Node Version Manager with Node LTS
+platforms: [darwin, linux]
+steps:
+  - type: shell
+    name: install nvm
+    check: '[ -d "$HOME/.nvm" ]'
+    install: |
+      curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  - type: shell
+    name: install Node LTS
+    check: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && command -v node'
+    install: |
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      nvm install --lts
+      nvm use --lts

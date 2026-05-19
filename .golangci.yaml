@@ -1,0 +1,25 @@
+run:
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - unused
+    - revive
+    - gofumpt
+    - goimports
+    - gocyclo
+    - funlen
+    - gosec
+    - errorlint
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  funlen:
+    lines: 80
+    statements: 60

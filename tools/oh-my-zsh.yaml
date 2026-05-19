@@ -1,0 +1,18 @@
+name: oh-my-zsh
+description: Zsh framework with plugins
+platforms: [darwin, linux]
+depends_on: [homebrew]
+steps:
+  - type: shell
+    name: install oh-my-zsh
+    check: '[ -d "$HOME/.oh-my-zsh" ]'
+    install: |
+      sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  - type: git_clone
+    name: install zsh-autosuggestions
+    url: https://github.com/zsh-users/zsh-autosuggestions
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+  - type: git_clone
+    name: install zsh-syntax-highlighting
+    url: https://github.com/zsh-users/zsh-syntax-highlighting
+    dest: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting

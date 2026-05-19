@@ -1,0 +1,7 @@
+name: mise
+description: mise (formerly rtx) dev tools config
+platforms: [darwin, linux]
+depends_on: [homebrew]
+configs:
+  - source: mise
+    target: ~

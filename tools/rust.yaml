@@ -1,0 +1,9 @@
+name: rust
+description: Rust toolchain via rustup
+platforms: [darwin, linux]
+steps:
+  - type: shell
+    name: install rustup
+    check: 'command -v rustc'
+    install: |
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y

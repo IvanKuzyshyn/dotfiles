@@ -1,0 +1,24 @@
+name: Integration (macOS)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * *'  # nightly at 10:00 UTC
+
+jobs:
+  integration:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Run integration tests
+        run: make test-int
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs
+          path: |
+            ~/.local/state/dot/runs/

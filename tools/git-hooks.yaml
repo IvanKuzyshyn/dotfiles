@@ -1,0 +1,10 @@
+name: git-hooks
+description: Pre-commit gitleaks scanning for this repo
+platforms: [darwin, linux]
+depends_on: [homebrew]
+steps:
+  - type: git_config
+    name: enable repo hooks
+    key: core.hooksPath
+    value: .githooks
+    scope: repo
