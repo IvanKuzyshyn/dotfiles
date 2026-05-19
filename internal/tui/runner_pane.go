@@ -75,7 +75,8 @@ func NewRunnerPane(tools []*tool.Tool) RunnerPane {
 		logs[t.Name] = newRingBuffer(logBufferCap)
 	}
 	sp := spinner.New()
-	sp.Spinner = spinner.Dot
+	sp.Spinner = spinner.MiniDot
+	sp.Style = runnerSpinnerStyle
 	return RunnerPane{
 		tools:    tools,
 		status:   status,
@@ -195,8 +196,9 @@ func (r RunnerPane) View() string {
 	return b.String()
 }
 
-// summaryBanner renders the end-of-run line showing tally + retry hint. Only
-// invoked when r.onSummary is true.
+// summaryBanner renders the end-of-run line showing tally + retry hint. The
+// banner color reflects the worst outcome: red if anything failed, yellow if
+// only skipped, green for all-success. Only invoked when r.onSummary is true.
 func (r RunnerPane) summaryBanner() string {
 	var s, f, sk int
 	for _, st := range r.status {
@@ -210,7 +212,14 @@ func (r RunnerPane) summaryBanner() string {
 		}
 	}
 	msg := fmt.Sprintf("Run complete: %d succeeded · %d failed · %d skipped", s, f, sk)
-	return runnerSummaryStyle.Render(msg)
+	style := runnerSummarySuccessStyle
+	switch {
+	case f > 0:
+		style = runnerSummaryFailStyle
+	case sk > 0:
+		style = runnerSummarySkipStyle
+	}
+	return style.Render(msg)
 }
 
 // helpFooter renders a one-line key-hint footer. The available actions depend
@@ -340,19 +349,20 @@ func (r RunnerPane) focusedLogString() string {
 }
 
 // statusIcon returns the leading glyph for a tool row. For Running tools it
-// returns the live spinner frame; for terminal states a static character.
+// returns the live spinner frame; for terminal states a static colored
+// character.
 func (r RunnerPane) statusIcon(s ToolStatus) string {
 	switch s {
 	case StatusRunning:
 		return r.spinner.View()
 	case StatusSucceeded:
-		return "✓"
+		return runnerSucceededStyle.Render("✓")
 	case StatusFailed:
-		return "✗"
+		return runnerFailedStyle.Render("✗")
 	case StatusSkipped:
-		return "~"
+		return runnerSkippedStyle.Render("~")
 	default:
-		return "·"
+		return runnerPendingStyle.Render("·")
 	}
 }
 
@@ -418,10 +428,20 @@ func (r RunnerPane) rightWidth() int {
 	return max(0, r.width-r.leftWidth())
 }
 
+// ANSI 16-color palette used so styling adapts to the user's terminal theme
+// instead of locking to a fixed truecolor value. `10` is bright green, `9` is
+// bright red, `11` is bright yellow, `14` is bright cyan.
 var (
-	runnerFocusedRowStyle = lipgloss.NewStyle().Bold(true)
-	runnerSummaryStyle    = lipgloss.NewStyle().Bold(true)
-	runnerHelpStyle       = lipgloss.NewStyle().Faint(true)
+	runnerFocusedRowStyle     = lipgloss.NewStyle().Bold(true)
+	runnerHelpStyle           = lipgloss.NewStyle().Faint(true)
+	runnerSucceededStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
+	runnerFailedStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
+	runnerSkippedStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("11"))
+	runnerSpinnerStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("14"))
+	runnerPendingStyle        = lipgloss.NewStyle().Faint(true)
+	runnerSummarySuccessStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)
+	runnerSummaryFailStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
+	runnerSummarySkipStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Bold(true)
 )
 
 // ringBuffer is a fixed-capacity FIFO of strings used for per-tool log
