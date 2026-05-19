@@ -1,14 +1,24 @@
-╭────────────────────────────────────────────────╮
-│                                                │
-│  Conflict at /x/y                              │
-│  Existing: file                                │
-│                                                │
-│    [ ] Backup                                  │
-│    [x] Overwrite                               │
-│    [ ] Skip                                    │
-│    [ ] Abort                                   │
-│                                                │
-│    [ ] Apply to remaining   (space to toggle)  │
-│                                                │
-│                                                │
-╰────────────────────────────────────────────────╯
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+               ╭────────────────────────────────────────────────╮               
+               │                                                │               
+               │   Conflict                                     │               
+               │   at: /x/y                                     │               
+               │   existing: file                               │               
+               │                                                │               
+               │     Backup                                     │               
+               │   ▸ Overwrite                                  │               
+               │     Skip                                       │               
+               │     Abort                                      │               
+               │                                                │               
+               │   [ ] Apply to remaining   (space to toggle)   │               
+               │                                                │               
+               │   ↑/↓ move · enter confirm · esc abort         │               
+               │                                                │               
+               ╰────────────────────────────────────────────────╯               
+                                                                                
+                                                                                
+                                                                                
+                                                                                

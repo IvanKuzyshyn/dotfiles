@@ -113,7 +113,7 @@ func (p Picker) Update(msg tea.Msg) (Picker, tea.Cmd) {
 	return p, cmd
 }
 
-// View renders a one-line status header above the bubbles list view.
+// View renders a status header, the bubbles list, and a key-hint footer.
 func (p Picker) View() string {
 	tag := p.tagFilter
 	if tag == "" {
@@ -121,8 +121,15 @@ func (p Picker) View() string {
 	} else {
 		tag = "tag=" + tag
 	}
-	status := fmt.Sprintf("[%d/%d selected · %s]", len(p.selected), len(p.tools), tag)
-	return pickerStatusStyle.Render(status) + "\n" + p.list.View()
+	// Highlight the selected-count when anything is picked so the user can
+	// tell the action is "armed".
+	count := fmt.Sprintf("%d/%d", len(p.selected), len(p.tools))
+	if len(p.selected) > 0 {
+		count = pickerCountActiveStyle.Render(count)
+	}
+	status := pickerStatusStyle.Render("[") + count + pickerStatusStyle.Render(" selected · "+tag+"]")
+	footer := pickerHelpStyle.Render("space toggle · a all · t cycle tag · / filter · enter run · q quit")
+	return status + "\n" + p.list.View() + "\n" + footer
 }
 
 // toggleCurrent flips the selection state of the item under the cursor.
@@ -278,7 +285,9 @@ func (d pickerDelegate) Render(w io.Writer, m list.Model, index int, item list.I
 }
 
 var (
-	pickerStatusStyle   = lipgloss.NewStyle().Faint(true)
-	pickerCursorStyle   = lipgloss.NewStyle().Reverse(true).Bold(true)
-	pickerSelectedStyle = lipgloss.NewStyle().Bold(true)
+	pickerStatusStyle      = lipgloss.NewStyle().Faint(true)
+	pickerHelpStyle        = lipgloss.NewStyle().Faint(true)
+	pickerCountActiveStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("14")).Bold(true)
+	pickerCursorStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("14")).Bold(true)
+	pickerSelectedStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
 )

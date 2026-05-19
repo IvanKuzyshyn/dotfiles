@@ -92,37 +92,42 @@ func (c ConflictModal) Update(msg tea.Msg) (ConflictModal, tea.Cmd) {
 }
 
 // View renders the modal body. When width/height are unknown it returns the
-// bare text without box styling so tests can assert on plain content.
+// bare text without box styling so tests can assert on plain content. When
+// sized, the bordered card is centered within the available viewport so it
+// reads as an overlay rather than a header.
 func (c ConflictModal) View() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Conflict at %s\n", c.target)
-	fmt.Fprintf(&b, "Existing: %s\n\n", c.existingKind)
+	fmt.Fprintf(&b, "%s\n", conflictTitleStyle.Render("Conflict"))
+	fmt.Fprintf(&b, "%s %s\n", conflictLabelStyle.Render("at:"), c.target)
+	fmt.Fprintf(&b, "%s %s\n\n", conflictLabelStyle.Render("existing:"), c.existingKind)
 
 	for i, action := range c.choices {
-		mark := "[ ]"
+		mark := "  "
+		label := conflictActionLabel(action)
 		if i == c.cursor {
-			mark = "[x]"
+			mark = conflictCursorStyle.Render("▸ ")
+			label = conflictCursorStyle.Render(label)
 		}
-		line := fmt.Sprintf("  %s %s", mark, conflictActionLabel(action))
-		if i == c.cursor {
-			line = conflictCursorStyle.Render(line)
-		}
-		b.WriteString(line)
-		b.WriteByte('\n')
+		fmt.Fprintf(&b, "%s%s\n", mark, label)
 	}
 
 	b.WriteByte('\n')
 	applyMark := "[ ]"
 	if c.applyAll {
-		applyMark = "[x]"
+		applyMark = conflictApplyOnStyle.Render("[x]")
 	}
-	fmt.Fprintf(&b, "  %s Apply to remaining   (space to toggle)\n", applyMark)
+	fmt.Fprintf(&b, "%s Apply to remaining   %s\n",
+		applyMark, conflictHintStyle.Render("(space to toggle)"))
+
+	b.WriteByte('\n')
+	b.WriteString(conflictHintStyle.Render("↑/↓ move · enter confirm · esc abort"))
 
 	body := b.String()
 	if c.width == 0 || c.height == 0 {
 		return body
 	}
-	return conflictBoxStyle.Render(body)
+	card := conflictBoxStyle.Render(body)
+	return lipgloss.Place(c.width, c.height, lipgloss.Center, lipgloss.Center, card)
 }
 
 // conflictActionLabel renders an action's human-readable name.
@@ -141,8 +146,13 @@ func conflictActionLabel(a event.ConflictAction) string {
 }
 
 var (
-	conflictCursorStyle = lipgloss.NewStyle().Reverse(true).Bold(true)
-	conflictBoxStyle    = lipgloss.NewStyle().
+	conflictCursorStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("14")).Bold(true)
+	conflictTitleStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("11")).Bold(true)
+	conflictLabelStyle   = lipgloss.NewStyle().Faint(true)
+	conflictHintStyle    = lipgloss.NewStyle().Faint(true)
+	conflictApplyOnStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("10")).Bold(true)
+	conflictBoxStyle     = lipgloss.NewStyle().
 				Border(lipgloss.RoundedBorder()).
-				Padding(1, 2)
+				BorderForeground(lipgloss.Color("11")).
+				Padding(1, 3)
 )
