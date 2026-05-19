@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -61,6 +62,7 @@ type RunnerPane struct {
 
 	spinner     spinner.Model
 	viewport    viewport.Model
+	progress    progress.Model
 	fullLogOpen bool
 	tickStarted bool
 }
@@ -77,12 +79,14 @@ func NewRunnerPane(tools []*tool.Tool) RunnerPane {
 	sp := spinner.New()
 	sp.Spinner = spinner.MiniDot
 	sp.Style = runnerSpinnerStyle
+	pb := progress.New(progress.WithDefaultGradient(), progress.WithoutPercentage())
 	return RunnerPane{
 		tools:    tools,
 		status:   status,
 		logs:     logs,
 		spinner:  sp,
 		viewport: viewport.New(0, 0),
+		progress: pb,
 	}
 }
 
@@ -101,6 +105,15 @@ func (r RunnerPane) Update(msg tea.Msg) (RunnerPane, tea.Cmd) {
 		// Leave a header row above the runner; the App renders it.
 		r.viewport.Width = m.Width
 		r.viewport.Height = max(0, m.Height-2)
+		// Cap the progress bar to something readable on wide terminals.
+		barWidth := m.Width - 4
+		if barWidth > 60 {
+			barWidth = 60
+		}
+		if barWidth < 10 {
+			barWidth = 10
+		}
+		r.progress.Width = barWidth
 		if r.fullLogOpen {
 			r.viewport.SetContent(r.focusedLogString())
 		}
@@ -109,6 +122,11 @@ func (r RunnerPane) Update(msg tea.Msg) (RunnerPane, tea.Cmd) {
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		r.spinner, cmd = r.spinner.Update(msg)
+		return r, cmd
+
+	case progress.FrameMsg:
+		newProg, cmd := r.progress.Update(msg)
+		r.progress = newProg.(progress.Model)
 		return r, cmd
 
 	case tea.KeyMsg:
@@ -189,6 +207,19 @@ func (r RunnerPane) View() string {
 	if r.onSummary {
 		b.WriteString(r.summaryBanner())
 		b.WriteByte('\n')
+	} else if len(r.tools) > 1 {
+		// Live progress bar while the run is in flight. For single-tool runs
+		// the bar is just noise; the spinner already conveys "I'm working".
+		done := 0
+		for _, t := range r.tools {
+			switch r.status[t.Name] {
+			case StatusSucceeded, StatusFailed, StatusSkipped:
+				done++
+			}
+		}
+		label := fmt.Sprintf(" %d/%d tools", done, len(r.tools))
+		b.WriteString(r.progress.View() + runnerHelpStyle.Render(label))
+		b.WriteByte('\n')
 	}
 	b.WriteString(body)
 	b.WriteByte('\n')
@@ -265,10 +296,13 @@ func (r *RunnerPane) applyEvent(e event.Event) tea.Cmd {
 		}
 	case event.ToolFinished:
 		r.status[e.Tool] = StatusSucceeded
+		cmd = r.progress.SetPercent(r.completionRatio())
 	case event.ToolFailed:
 		r.status[e.Tool] = StatusFailed
+		cmd = r.progress.SetPercent(r.completionRatio())
 	case event.ToolSkipped:
 		r.status[e.Tool] = StatusSkipped
+		cmd = r.progress.SetPercent(r.completionRatio())
 	case event.LogLine:
 		r.pushLog(e.Tool, e.Line)
 	case event.StepStarted:
@@ -288,6 +322,22 @@ func (r *RunnerPane) applyEvent(e event.Event) tea.Cmd {
 	}
 	r.refreshSummaryFlag()
 	return cmd
+}
+
+// completionRatio returns the fraction of tools in a terminal state. Used to
+// drive the progress bar.
+func (r RunnerPane) completionRatio() float64 {
+	if len(r.tools) == 0 {
+		return 0
+	}
+	done := 0
+	for _, t := range r.tools {
+		switch r.status[t.Name] {
+		case StatusSucceeded, StatusFailed, StatusSkipped:
+			done++
+		}
+	}
+	return float64(done) / float64(len(r.tools))
 }
 
 // refreshSummaryFlag flips onSummary to true when every tool has reached a
