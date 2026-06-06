@@ -19,7 +19,7 @@ echo "✅ Platform: macOS"
 
 # ── Item registry ──────────────────────────────────────────────────
 
-add_item "homebrew-tools" "16 packages via Brewfile"
+add_item "homebrew-tools" "22 packages via Brewfile"
 add_item "rust"           "via rustup"
 add_item "oh-my-zsh"      "zsh framework"
 add_item "nvm"            "Node.js version manager"
