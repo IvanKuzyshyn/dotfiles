@@ -55,7 +55,7 @@ The repository provides a two-step setup process:
    - Detects platform (macOS only currently)
    - Prompts `[Y/n]` for each tool (Enter = yes, `n` = skip)
    - Installs Homebrew if missing
-   - Installs packages: stow, k9s, kubectl, awscli, gh, jq, yq, ncdu, git, go, mise, gitleaks
+   - Installs packages: stow, k9s, kubectl, kubectx, helm, kind, ko, oras, kluctl, awscli, gh, jq, yq, ncdu, git, go, mise, gitleaks
    - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), docker (Docker Desktop)
    - Installs Rust via rustup
    - Installs oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
