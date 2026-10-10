@@ -1,6 +1,6 @@
 # dotfiles
 
-A batteries-included dotfiles repository that turns a fresh macOS machine into a
+dotfiles repository that turns a fresh macOS machine into a
 fast, robust local development environment in a couple of commands. One run
 installs the tools, the next deploys the configuration — no manual copy/paste,
 no remembering which `brew install` flags you used last time.
