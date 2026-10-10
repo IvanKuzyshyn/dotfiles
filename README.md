@@ -84,6 +84,7 @@ The `install.sh` script installs all required tools:
 - oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
 - nvm + Node.js LTS
 - Claude Code (via npm)
+- pi (via npm) — multi-model coding agent harness
 
 ### 2. Deploy Configurations
 

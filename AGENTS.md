@@ -61,6 +61,7 @@ The repository provides a two-step setup process:
    - Installs oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
    - Installs nvm and Node.js LTS
    - Installs Claude Code via npm
+   - Installs pi via npm
    - Configures this repo's pre-commit hook (`core.hooksPath=.githooks`) for gitleaks scanning
    - Idempotent (safe to re-run)
    - `--all` flag skips prompts (installs everything)
@@ -89,6 +90,7 @@ The repository provides a two-step setup process:
 | nvm | Official installer | `~/.nvm/` |
 | Node.js | nvm | `~/.nvm/versions/node/` |
 | Claude Code | npm global | `~/.npm/` or nvm node path |
+| pi | npm global (`@mariozechner/pi-coding-agent`) | `~/.npm/` or nvm node path |
 | mise | `brew install mise` | Dev tools & env manager |
 | GNU Stow | `brew install stow` | Required for deployment |
 | gitleaks | `brew install gitleaks` | Secret scanning (pre-commit + CI) |
@@ -283,7 +285,7 @@ The default gitleaks ruleset is used (no `.gitleaks.toml`). Add allowlists or cu
 **`install.sh`:**
 - Sources `lib/menu.sh` for confirmation prompts
 - Brew tools managed via `Brewfile` (not arrays in install.sh)
-- Non-brew tools (rust, oh-my-zsh, nvm, claude-code) have dedicated install blocks
+- Non-brew tools (rust, oh-my-zsh, nvm, claude-code, pi) have dedicated install blocks
 - `git-hooks` item runs `git config core.hooksPath .githooks` (scoped to this repo only)
 - Each tool confirmed inline via `confirm_item` before its install block
 - Supports `--all` flag to skip prompts (install everything)

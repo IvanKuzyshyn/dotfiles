@@ -24,6 +24,7 @@ add_item "rust"           "via rustup"
 add_item "oh-my-zsh"      "zsh framework"
 add_item "nvm"            "Node.js version manager"
 add_item "claude-code"    "AI coding assistant"
+add_item "pi"             "multi-model coding agent harness"
 add_item "git-hooks"      "pre-commit secret scanning for this repo (gitleaks)"
 
 # ── Installation ────────────────────────────────────────────────────
@@ -136,6 +137,22 @@ if confirm_item "claude-code"; then
         echo "✅ Claude Code installed"
     else
         echo "⚠️  Skipping Claude Code: npm not found (install nvm first to get Node.js)"
+    fi
+fi
+
+# Install pi via npm
+if confirm_item "pi"; then
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+    if command -v pi &> /dev/null; then
+        echo "✅ pi already installed"
+    elif command -v npm &> /dev/null; then
+        echo "🤖 Installing pi..."
+        npm install -g @mariozechner/pi-coding-agent
+        echo "✅ pi installed"
+    else
+        echo "⚠️  Skipping pi: npm not found (install nvm first to get Node.js)"
     fi
 fi
 
