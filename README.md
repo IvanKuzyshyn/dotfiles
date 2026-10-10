@@ -516,3 +516,4 @@ vim configs/zsh/.zshrc
 ## License
 
 Public domain via [Unlicense](LICENSE). Use freely.
+Edited by a Terrarium agent smoke test.
