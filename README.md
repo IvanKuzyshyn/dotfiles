@@ -67,7 +67,7 @@ The `install.sh` script installs all required tools:
 
 **Homebrew packages and casks** (managed via `Brewfile`):
 - GNU Stow (config management)
-- k9s, kubectl (Kubernetes)
+- k9s, kubectl, kind (Kubernetes)
 - awscli, gh (Cloud & GitHub)
 - jq, yq (JSON/YAML processors)
 - ncdu (Disk usage analyzer)
@@ -77,6 +77,7 @@ The `install.sh` script installs all required tools:
 - Ghostty (Terminal emulator)
 - Raycast (Productivity launcher)
 - Cursor (AI code editor)
+- Codex (OpenAI coding agent CLI)
 - Docker (Docker Desktop)
 
 **Other tools** (dedicated installers):
@@ -357,6 +358,7 @@ instructions. The template (`CLAUDE.sample.md`) encodes preferences for:
   WIP branches when ambiguous.
 - **GitHub** — use `gh` high-level commands, never raw `gh api` calls.
 - **Comments** — explain *why*, not *what*.
+- **Structured data** — use `yq` for YAML and `jq` for JSON, never ad-hoc Python scripts.
 
 Edit `~/.claude/CLAUDE.md` to customize per-machine; project-specific
 overrides go in `CLAUDE.md`/`AGENTS.md` at the project root.
