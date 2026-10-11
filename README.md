@@ -67,7 +67,7 @@ The `install.sh` script installs all required tools:
 
 **Homebrew packages and casks** (managed via `Brewfile`):
 - GNU Stow (config management)
-- k9s, kubectl (Kubernetes)
+- k9s, kubectl, kind (Kubernetes)
 - awscli, gh (Cloud & GitHub)
 - jq, yq (JSON/YAML processors)
 - ncdu (Disk usage analyzer)
