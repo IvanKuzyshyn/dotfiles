@@ -357,6 +357,7 @@ instructions. The template (`CLAUDE.sample.md`) encodes preferences for:
 - **Version control** — concise imperative commit messages, frequent commits,
   WIP branches when ambiguous.
 - **GitHub** — use `gh` high-level commands, never raw `gh api` calls.
+- **Structured data** — use `yq` for YAML and `jq` for JSON, never ad-hoc Python scripts.
 - **Comments** — explain *why*, not *what*.
 
 Edit `~/.claude/CLAUDE.md` to customize per-machine; project-specific
