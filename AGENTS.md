@@ -56,7 +56,7 @@ The repository provides a two-step setup process:
    - Prompts `[Y/n]` for each tool (Enter = yes, `n` = skip)
    - Installs Homebrew if missing
    - Installs packages: stow, k9s, kubectl, kubectx, helm, kind, ko, oras, kluctl, awscli, gh, jq, yq, ncdu, git, go, mise, gitleaks
-   - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), docker (Docker Desktop)
+   - Installs casks: ghostty (terminal emulator), raycast (productivity launcher), cursor (AI code editor), codex (OpenAI coding agent CLI), docker (Docker Desktop)
    - Installs Rust via rustup
    - Installs oh-my-zsh with plugins (zsh-autosuggestions, zsh-syntax-highlighting)
    - Installs nvm and Node.js LTS
@@ -82,7 +82,8 @@ The repository provides a two-step setup process:
 |------|--------|----------|
 | Homebrew packages | `brew install` | Managed by Homebrew |
 | Homebrew casks (GUI apps) | `brew install --cask` | Managed by Homebrew |
-| Ghostty, Raycast, Cursor, Docker | `brew install --cask` | `/Applications/` |
+| Ghostty, Raycast, Cursor, Codex, Docker | `brew install --cask` | `/Applications/` |
+| Codex | `brew install --cask codex` | `$(brew --prefix)/bin/codex` |
 | Rust | rustup installer | `~/.cargo/` |
 | oh-my-zsh | Official installer | `~/.oh-my-zsh/` |
 | zsh plugins | git clone | `~/.oh-my-zsh/custom/plugins/` |
