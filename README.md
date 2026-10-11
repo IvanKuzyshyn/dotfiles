@@ -77,6 +77,7 @@ The `install.sh` script installs all required tools:
 - Ghostty (Terminal emulator)
 - Raycast (Productivity launcher)
 - Cursor (AI code editor)
+- Codex (OpenAI coding agent CLI)
 - Docker (Docker Desktop)
 
 **Other tools** (dedicated installers):
