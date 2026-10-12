@@ -102,5 +102,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 # Tools Usage
 
-- For YAML file validation, always use `yq`. Never write a Python script for verification.
+- For YAML files, always use `yq` to parse, edit, and validate.
+- For JSON files, always use `jq` to parse, edit, and validate.
+- Never write custom Python scripts to parse, edit, or validate YAML or JSON.
 - When opening a GitHub pull request, always open it as a draft unless directly asked to open a normal pull request.
